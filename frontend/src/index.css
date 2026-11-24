@@ -1,0 +1,815 @@
+
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/* =========================================================
+   CAMPUSSYNC - GLOBAL STYLES
+   ========================================================= */
+
+body {
+  background-color: #f8fafc;
+  color: #1f2421;
+}
+
+/* Stamp animation */
+@keyframes stamp-in {
+  0% {
+    opacity: 0;
+    transform: scale(1.15) rotate(-4deg);
+  }
+  100% {
+    opacity: 1;
+    transform: scale(1) rotate(-4deg);
+  }
+}
+
+.stamp {
+  animation: stamp-in 0.35s ease-out;
+}
+
+/* =========================================================
+   PRINT STYLES
+   ========================================================= */
+
+/* Print only the grade card */
+@media print {
+  body * {
+    visibility: hidden;
+  }
+
+  .print-area,
+  .print-area * {
+    visibility: visible;
+  }
+
+  .print-area {
+    position: absolute;
+    left: 0;
+    top: 0;
+    width: 100%;
+    border: none !important;
+  }
+}
+
+/* =========================================================
+   STUDENT EMBEDDED LAYOUT
+   ========================================================= */
+
+.student-embedded > div {
+  min-height: 0 !important;
+  background: transparent !important;
+}
+
+.student-embedded > div > header:first-child {
+  display: none;
+}
+
+/* =========================================================
+   CAMPUSSYNC BURGUNDY + ROSE GOLD THEME
+   Active when body has class "theme-future"
+   ========================================================= */
+
+body.theme-future {
+  --cs-sidebar: #351c2b;
+  --cs-primary: #8c3f61;
+  --cs-accent: #d7a1a9;
+  --cs-bg: #faf4f5;
+  --cs-card: #ffffff;
+  --cs-text: #352632;
+  --cs-muted: #887782;
+  --cs-border: #f0e1e6;
+  --cs-success: #16865c;
+  --cs-warning: #d69a35;
+  --cs-error: #d94a5b;
+
+  color: var(--cs-text);
+
+  background:
+    radial-gradient(
+      800px 420px at 100% -5%,
+      rgba(215, 161, 169, 0.22),
+      transparent 60%
+    ),
+    radial-gradient(
+      700px 420px at 0% 105%,
+      rgba(140, 63, 97, 0.08),
+      transparent 60%
+    ),
+    var(--cs-bg);
+
+  background-attachment: fixed;
+}
+
+/* =========================================================
+   TOP ROSE GOLD ACCENT LINE
+   ========================================================= */
+
+body.theme-future::before {
+  content: '';
+  position: fixed;
+  inset: 0 0 auto 0;
+  height: 3px;
+  z-index: 60;
+  pointer-events: none;
+
+  background: linear-gradient(
+    90deg,
+    #8c3f61,
+    #d7a1a9,
+    #8c3f61
+  );
+}
+
+/* =========================================================
+   PAGE BACKGROUND
+   ========================================================= */
+
+body.theme-future .min-h-screen.bg-slate-50,
+body.theme-future .h-screen.bg-slate-50 {
+  background: transparent;
+}
+
+/* =========================================================
+   TEXT AND BORDERS
+   ========================================================= */
+
+body.theme-future .text-slate-900,
+body.theme-future .text-slate-800 {
+  color: var(--cs-text);
+}
+
+body.theme-future .text-slate-700,
+body.theme-future .text-slate-600 {
+  color: #5e4d59;
+}
+
+body.theme-future .text-slate-500,
+body.theme-future .text-slate-400 {
+  color: var(--cs-muted);
+}
+
+body.theme-future .border-slate-100,
+body.theme-future .border-slate-200,
+body.theme-future .border-slate-300 {
+  border-color: var(--cs-border);
+}
+
+body.theme-future .divide-slate-100 > * + * {
+  border-color: var(--cs-border);
+}
+
+/* =========================================================
+   STATUS COLORS
+   ========================================================= */
+
+/* Success */
+body.theme-future .text-green-700,
+body.theme-future .text-green-800,
+body.theme-future .text-green-600 {
+  color: var(--cs-success);
+}
+
+body.theme-future .bg-green-50 {
+  background-color: #e8f5ef;
+}
+
+body.theme-future .border-green-200 {
+  border-color: #bfe3d3;
+}
+
+body.theme-future .bg-green-500 {
+  background-color: var(--cs-success);
+}
+
+/* Warning */
+body.theme-future .text-amber-700 {
+  color: #9a6a1b;
+}
+
+body.theme-future .bg-amber-50 {
+  background-color: #fbf3e2;
+}
+
+body.theme-future .border-amber-200 {
+  border-color: #f0dcae;
+}
+
+body.theme-future .bg-amber-500 {
+  background-color: var(--cs-warning);
+}
+
+/* Error */
+body.theme-future .text-red-600,
+body.theme-future .text-red-700,
+body.theme-future .text-red-800 {
+  color: var(--cs-error);
+}
+
+body.theme-future .bg-red-50 {
+  background-color: #fdecee;
+}
+
+body.theme-future .border-red-200 {
+  border-color: #f4c3c9;
+}
+
+body.theme-future .bg-red-500 {
+  background-color: var(--cs-error);
+}
+
+/* =========================================================
+   TOP HEADER
+   ========================================================= */
+
+body.theme-future header {
+  background: rgba(255, 255, 255, 0.82) !important;
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+
+  border-bottom: 1px solid var(--cs-border) !important;
+}
+
+/* =========================================================
+   CARDS
+   ========================================================= */
+
+body.theme-future .bg-white.rounded-xl,
+body.theme-future .bg-white.rounded-2xl {
+  background: var(--cs-card);
+
+  border: 1px solid var(--cs-border);
+
+  box-shadow:
+    0 6px 22px -12px rgba(53, 28, 43, 0.18);
+
+  transition:
+    box-shadow 0.25s ease,
+    border-color 0.25s ease,
+    transform 0.25s ease;
+}
+
+body.theme-future .bg-white.rounded-xl:hover,
+body.theme-future .bg-white.rounded-2xl:hover {
+  border-color: rgba(215, 161, 169, 0.9);
+
+  box-shadow:
+    0 14px 34px -14px rgba(140, 63, 97, 0.28);
+}
+
+/* Clickable cards */
+body.theme-future button.bg-white.rounded-xl:hover,
+body.theme-future button.bg-white.rounded-2xl:hover {
+  transform: translateY(-2px);
+}
+
+/* =========================================================
+   BUTTONS
+   ========================================================= */
+
+body.theme-future button,
+body.theme-future a {
+  transition:
+    transform 0.15s ease,
+    box-shadow 0.25s ease,
+    background-color 0.2s ease,
+    color 0.2s ease,
+    border-color 0.2s ease;
+}
+
+body.theme-future button:not(:disabled):active {
+  transform: scale(0.97);
+}
+
+/* Keyboard focus */
+body.theme-future button:focus-visible,
+body.theme-future a:focus-visible,
+body.theme-future input:focus-visible,
+body.theme-future select:focus-visible,
+body.theme-future textarea:focus-visible {
+  outline: 2px solid var(--cs-accent);
+  outline-offset: 2px;
+}
+
+/* Primary purple buttons converted to burgundy */
+body.theme-future .bg-purple-600 {
+  background-image: linear-gradient(
+    135deg,
+    #8c3f61 0%,
+    #a3516f 100%
+  );
+
+  box-shadow:
+    0 6px 16px -8px rgba(140, 63, 97, 0.7);
+}
+
+body.theme-future .bg-purple-600:hover:not(:disabled) {
+  box-shadow:
+    0 10px 22px -8px rgba(140, 63, 97, 0.8),
+    0 0 0 3px rgba(215, 161, 169, 0.35);
+}
+
+/* Outline buttons */
+body.theme-future button.border-purple-600:hover {
+  background-color: rgba(215, 161, 169, 0.18);
+}
+
+/* Selected tabs */
+body.theme-future button.border-b-2.border-purple-600 {
+  box-shadow: 0 2px 0 0 var(--cs-accent);
+}
+
+/* =========================================================
+   INPUTS AND FORMS
+   ========================================================= */
+
+body.theme-future input:not([type='checkbox']):not([type='radio']):focus,
+body.theme-future select:focus,
+body.theme-future textarea:focus {
+  border-color: var(--cs-primary);
+
+  box-shadow:
+    0 0 0 3px rgba(215, 161, 169, 0.4);
+}
+
+body.theme-future input[type='checkbox'],
+body.theme-future input[type='radio'] {
+  accent-color: var(--cs-primary);
+}
+
+/* =========================================================
+   SIDEBAR
+   ========================================================= */
+
+body.theme-future aside {
+  background: linear-gradient(
+    180deg,
+    #351c2b 0%,
+    #2b1622 100%
+  ) !important;
+
+  border-right: 1px solid rgba(215, 161, 169, 0.18) !important;
+
+  box-shadow:
+    4px 0 24px -12px rgba(53, 28, 43, 0.45);
+}
+
+body.theme-future aside .bg-white {
+  background: transparent !important;
+}
+
+/* Sidebar borders */
+body.theme-future aside [class*='border-slate'],
+body.theme-future aside [class*='border-gray'] {
+  border-color: rgba(255, 255, 255, 0.1) !important;
+}
+
+/* Sidebar text */
+body.theme-future aside [class*='text-slate'],
+body.theme-future aside [class*='text-gray'] {
+  color: #f3e6ea !important;
+}
+
+/* Sidebar section headings */
+body.theme-future aside .uppercase {
+  color: var(--cs-accent) !important;
+  letter-spacing: 0.12em;
+  opacity: 0.85;
+}
+
+/* Sidebar icons and purple text */
+body.theme-future aside [class*='text-purple'] {
+  color: var(--cs-accent) !important;
+}
+
+/* Sidebar hover */
+body.theme-future aside button:hover,
+body.theme-future aside a:hover {
+  background-color: rgba(215, 161, 169, 0.14) !important;
+  color: #ffffff !important;
+}
+
+/* Active menu item */
+body.theme-future aside [class*='bg-purple-50'],
+body.theme-future aside [class*='bg-purple-100'] {
+  background: #8c3f61 !important;
+
+  box-shadow:
+    inset 3px 0 0 var(--cs-accent),
+    0 8px 18px -10px rgba(0, 0, 0, 0.6);
+}
+
+body.theme-future aside [class*='bg-purple-50'] *,
+body.theme-future aside [class*='bg-purple-100'] * {
+  color: #ffffff !important;
+}
+
+/* =========================================================
+   SCROLLBAR
+   ========================================================= */
+
+body.theme-future ::-webkit-scrollbar {
+  width: 10px;
+  height: 10px;
+}
+
+body.theme-future ::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+body.theme-future ::-webkit-scrollbar-thumb {
+  background: var(--cs-accent);
+  border-radius: 999px;
+  border: 2px solid transparent;
+  background-clip: padding-box;
+}
+
+/* =========================================================
+   CARD ENTRANCE ANIMATION
+   ========================================================= */
+
+@keyframes cs-fade-up {
+  from {
+    opacity: 0;
+    transform: translateY(6px);
+  }
+
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+body.theme-future .bg-white.rounded-xl,
+body.theme-future .bg-white.rounded-2xl {
+  animation: cs-fade-up 0.35s ease both;
+}
+
+/* =========================================================
+   REDUCED MOTION ACCESSIBILITY
+   ========================================================= */
+
+@media (prefers-reduced-motion: reduce) {
+  body.theme-future .bg-white.rounded-xl,
+  body.theme-future .bg-white.rounded-2xl {
+    animation: none;
+  }
+
+  body.theme-future button:not(:disabled):active {
+    transform: none;
+  }
+}
+
+/* =========================================================
+   PRINT STYLES - CLEAN OUTPUT
+   ========================================================= */
+
+@media print {
+  body.theme-future {
+    background: #ffffff !important;
+  }
+
+  body.theme-future::before {
+    display: none;
+  }
+
+  body.theme-future * {
+    backdrop-filter: none !important;
+    -webkit-backdrop-filter: none !important;
+    animation: none !important;
+    box-shadow: none !important;
+  }
+
+  body.theme-future .bg-white.rounded-xl,
+  body.theme-future .bg-white.rounded-2xl {
+    background: #ffffff !important;
+  }
+}
+
+
+
+/* =====================================================
+   CAMPUSSYNC LOGIN PAGE - BURGUNDY + ROSE GOLD
+   ===================================================== */
+
+.login-page {
+  --login-dark: #351c2b;
+  --login-primary: #8c3f61;
+  --login-accent: #d7a1a9;
+  --login-bg: #faf4f5;
+  --login-text: #352632;
+  --login-muted: #887782;
+
+  min-height: 100vh;
+  background:
+    radial-gradient(
+      circle at 10% 15%,
+      rgba(215, 161, 169, 0.22),
+      transparent 35%
+    ),
+    radial-gradient(
+      circle at 90% 85%,
+      rgba(140, 63, 97, 0.13),
+      transparent 35%
+    ),
+    var(--login-bg);
+  color: var(--login-text);
+}
+
+/* Login Header */
+.login-page .login-header {
+  background: var(--login-dark);
+  color: white;
+  border-bottom: 1px solid rgba(215, 161, 169, 0.3);
+  box-shadow: 0 4px 20px rgba(53, 28, 43, 0.15);
+}
+
+/* Main Login Container */
+.login-page .login-panel {
+  background: rgba(255, 255, 255, 0.94);
+  border: 1px solid #f0e1e6;
+  border-radius: 24px;
+  box-shadow: 0 20px 60px rgba(53, 28, 43, 0.13);
+}
+
+/* Welcome Heading */
+.login-page .login-heading {
+  color: var(--login-text);
+}
+
+.login-page .login-subtitle {
+  color: var(--login-muted);
+}
+
+.login-page .login-highlight {
+  color: var(--login-primary);
+}
+
+/* Role Cards */
+.login-page .role-card {
+  background: #ffffff;
+  border: 1px solid #f0e1e6;
+  border-radius: 16px;
+  transition: all 0.25s ease;
+  box-shadow: 0 5px 18px rgba(53, 28, 43, 0.04);
+  cursor: pointer;
+}
+
+.login-page .role-card:hover {
+  border-color: var(--login-accent);
+  transform: translateY(-5px);
+  box-shadow: 0 14px 30px rgba(140, 63, 97, 0.14);
+}
+
+.login-page .role-card h3 {
+  color: var(--login-dark);
+}
+
+.login-page .role-card p {
+  color: var(--login-muted);
+}
+
+/* Role Icon */
+.login-page .role-icon {
+  background: #f8eaf0;
+  color: var(--login-primary);
+  border-radius: 50%;
+  transition: all 0.25s ease;
+}
+
+.login-page .role-card:hover .role-icon {
+  background: var(--login-primary);
+  color: white;
+}
+
+/* Role Arrow */
+.login-page .role-arrow {
+  color: var(--login-primary);
+  transition: transform 0.2s ease;
+}
+
+.login-page .role-card:hover .role-arrow {
+  transform: translateX(5px);
+}
+
+/* Primary Button */
+.login-page .login-button {
+  background: linear-gradient(
+    135deg,
+    #8c3f61,
+    #a3516f
+  );
+  color: #ffffff;
+  border: none;
+  box-shadow: 0 7px 18px rgba(140, 63, 97, 0.22);
+  transition: all 0.25s ease;
+}
+
+.login-page .login-button:hover {
+  background: linear-gradient(
+    135deg,
+    #71334f,
+    #8c3f61
+  );
+  box-shadow: 0 10px 25px rgba(140, 63, 97, 0.3);
+  transform: translateY(-2px);
+}
+
+/* Form Inputs */
+.login-page input,
+.login-page select {
+  border: 1px solid #ead8df;
+  border-radius: 10px;
+  color: var(--login-text);
+}
+
+.login-page input:focus,
+.login-page select:focus {
+  outline: none;
+  border-color: var(--login-primary);
+  box-shadow: 0 0 0 3px rgba(215, 161, 169, 0.3);
+}
+
+/* Security Footer */
+.login-page .login-security {
+  color: var(--login-muted);
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+  .login-page .login-panel {
+    border-radius: 18px;
+    padding: 24px;
+    margin: 16px;
+  }
+
+  .login-page .role-card:hover {
+    transform: none;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .login-page * {
+    transition: none !important;
+  }
+}
+
+/* =====================================================
+   LOGIN PAGE - BURGUNDY + ROSE GOLD
+   ===================================================== */
+
+.login-page {
+  --login-dark: #351c2b;
+  --login-primary: #8c3f61;
+  --login-accent: #d7a1a9;
+  --login-bg: #faf4f5;
+  --login-text: #352632;
+  --login-muted: #887782;
+}
+
+/* Background overlay */
+.login-page .login-overlay {
+  background: linear-gradient(
+    135deg,
+    rgba(53, 28, 43, 0.82),
+    rgba(100, 43, 69, 0.70),
+    rgba(53, 28, 43, 0.78)
+  );
+  backdrop-filter: blur(3px);
+}
+
+/* Header */
+.login-page .login-header {
+  background: rgba(53, 28, 43, 0.96);
+  color: #ffffff;
+  border-bottom: 1px solid rgba(215, 161, 169, 0.3);
+  box-shadow: 0 5px 20px rgba(53, 28, 43, 0.2);
+}
+
+.login-page .login-header-subtitle {
+  color: #ead8df;
+}
+
+/* Logo */
+.login-page .login-logo {
+  background: linear-gradient(135deg, #8c3f61, #d7a1a9);
+  color: white;
+  box-shadow: 0 5px 15px rgba(215, 161, 169, 0.25);
+}
+
+/* Main panel */
+.login-page .login-panel {
+  background: rgba(255, 255, 255, 0.96);
+  border: 1px solid rgba(215, 161, 169, 0.45);
+  border-radius: 25px;
+  box-shadow: 0 25px 70px rgba(35, 15, 27, 0.28);
+}
+
+/* Heading */
+.login-page .login-heading {
+  color: #352632;
+}
+
+.login-page .login-highlight {
+  color: #8c3f61;
+}
+
+.login-page .login-subtitle {
+  color: #887782;
+}
+
+.login-page .login-heading-line {
+  background: linear-gradient(90deg, #8c3f61, #d7a1a9);
+}
+
+/* Role cards */
+.login-page .role-card-shell {
+  min-width: 0;
+  border-radius: 16px;
+  background: #ffffff;
+  border: 1px solid #f0e1e6;
+  box-shadow: 0 5px 18px rgba(53, 28, 43, 0.06);
+  transition: all 0.25s ease;
+  overflow: hidden;
+}
+
+.login-page .role-card-shell:hover {
+  transform: translateY(-5px);
+  border-color: #d7a1a9;
+  box-shadow: 0 15px 30px rgba(140, 63, 97, 0.15);
+}
+
+/* Style the actual RoleCard root */
+.login-page .role-card-shell > * {
+  width: 100%;
+  height: 100%;
+  background: transparent !important;
+  border-color: transparent !important;
+  box-shadow: none !important;
+  border-radius: inherit;
+  color: #352632;
+  text-align: left;
+}
+
+/* Role card text */
+.login-page .role-card-shell h3,
+.login-page .role-card-shell h4 {
+  color: #351c2b !important;
+}
+
+.login-page .role-card-shell p {
+  color: #887782 !important;
+}
+
+/* Role icons - convert original colours */
+.login-page .role-card-shell [class*="bg-blue"],
+.login-page .role-card-shell [class*="bg-green"],
+.login-page .role-card-shell [class*="bg-purple"],
+.login-page .role-card-shell [class*="bg-orange"],
+.login-page .role-card-shell [class*="bg-indigo"] {
+  background: #f8eaf0 !important;
+  color: #8c3f61 !important;
+}
+
+/* Icon hover */
+.login-page .role-card-shell:hover [class*="bg-"] {
+  color: #8c3f61 !important;
+}
+
+/* Role arrows */
+.login-page .role-card-shell svg {
+  color: #8c3f61;
+}
+
+/* Footer */
+.login-page .login-security {
+  color: #887782;
+}
+
+.login-page .login-divider {
+  background: #e8d5dd;
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+  .login-page .login-panel {
+    padding: 26px 20px;
+    border-radius: 18px;
+  }
+
+  .login-page .login-heading {
+    font-size: 28px;
+  }
+
+  .login-page .role-card-shell:hover {
+    transform: none;
+  }
+}
+
+/* Accessibility */
+@media (prefers-reduced-motion: reduce) {
+  .login-page .role-card-shell {
+    transition: none;
+  }
+}
+

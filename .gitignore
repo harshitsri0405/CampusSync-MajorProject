@@ -1,0 +1,29 @@
+# secrets and local files
+backend/.env
+
+# python
+__pycache__/
+*.pyc
+venv/
+venv2/
+
+# node
+node_modules/
+frontend/dist/
+# Python virtual env & cache
+venv2/
+venv/
+__pycache__/
+*.py[cod]
+
+# Node / Frontend
+frontend/node_modules/
+node_modules/
+dist/
+build/
+
+# Secrets & local env
+.env
+.env.*
+backend/.env
+frontend/.env
