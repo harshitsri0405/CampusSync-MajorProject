@@ -54,7 +54,7 @@ export default function StudentQrScanPage({ session }) {
     scanner.current = sc
     sc.start({ facingMode: 'environment' }, { fps: 10, qrbox: { width: 240, height: 240 } }, onDecoded, () => {})
       .catch(() => {
-        if (!cancelled) { setError('Camera nahi khul paya. Browser me camera ki permission do.'); setPhase('idle') }
+        if (!cancelled) { setError('Unable to open the camera. Please allow camera access in your browser.'); setPhase('idle') }
       })
     return () => { cancelled = true; stopScanner() }
   }, [phase]) // eslint-disable-line react-hooks/exhaustive-deps
@@ -69,16 +69,16 @@ export default function StudentQrScanPage({ session }) {
     <div className="max-w-xl mx-auto">
       <div className="mb-4">
         <h1 className="font-display text-2xl text-slate-900">QR Attendance</h1>
-        <p className="font-body text-sm text-slate-500">Class me faculty ke QR ko scan karo. Tumhari location class ke paas honi chahiye.</p>
+        <p className="font-body text-sm text-slate-500">Scan the faculty's QR code in class. You must be near the classroom.</p>
       </div>
 
       <div className="bg-white rounded-2xl border border-purple-100 shadow-sm p-5">
         {phase === 'idle' && (
           <div className="text-center py-4">
             <span className="mx-auto flex h-16 w-16 items-center justify-center rounded-full bg-purple-50 text-purple-600"><ScanLine size={30} /></span>
-            <p className="font-body text-sm text-slate-600 mt-3 mb-4">Scan shuru karne par browser <b>location</b> aur <b>camera</b> ki permission maangega.</p>
+            <p className="font-body text-sm text-slate-600 mt-3 mb-4">When you start scanning, your browser will ask for <b>location</b> and <b>camera</b> permission.</p>
             <button onClick={begin} className="inline-flex items-center gap-2 rounded-lg bg-purple-600 px-5 py-2.5 font-body text-sm font-medium text-white hover:bg-purple-700">
-              <MapPin size={16} /> Scan shuru karo
+              <MapPin size={16} /> Start scan
             </button>
           </div>
         )}
@@ -86,36 +86,36 @@ export default function StudentQrScanPage({ session }) {
         {phase === 'scanning' && (
           <div>
             <div id="qr-reader" className="mx-auto w-full max-w-sm overflow-hidden rounded-xl" />
-            <p className="text-center font-body text-sm text-slate-500 mt-3">QR ko camera ke saamne rakho.</p>
+            <p className="text-center font-body text-sm text-slate-500 mt-3">Hold the QR code in front of the camera.</p>
             <div className="text-center mt-2">
               <button onClick={() => setPhase('idle')} className="font-body text-sm text-purple-700 underline">Cancel</button>
             </div>
           </div>
         )}
 
-        {phase === 'verifying' && <p className="text-center font-body text-sm text-slate-600 py-8">Location check ho rahi hai...</p>}
+        {phase === 'verifying' && <p className="text-center font-body text-sm text-slate-600 py-8">Verifying your location...</p>}
 
         {phase === 'done' && result && (
           <div className="text-center py-2">
             <CheckCircle2 size={48} className="mx-auto text-green-600" />
-            <p className="font-display text-xl text-slate-900 mt-2">Attendance darj ho gayi</p>
+            <p className="font-display text-xl text-slate-900 mt-2">Attendance recorded</p>
             <div className="mt-4 rounded-xl bg-purple-50 p-4 text-left font-body text-sm space-y-1.5">
               <p><span className="text-slate-500">Subject:</span> <b className="text-slate-900">{result.subject}</b></p>
               <p><span className="text-slate-500">Date:</span> <b className="text-slate-900">{fmtDay(result.day)}</b></p>
               <p><span className="text-slate-500">Time:</span> <b className="text-slate-900">{fmtTime(result.scanned_at)}</b></p>
-              <p><span className="text-slate-500">Class se doori:</span> <b className="text-slate-900">{result.distance_m} m</b></p>
+              <p><span className="text-slate-500">Distance from class:</span> <b className="text-slate-900">{result.distance_m} m</b></p>
             </div>
-            <p className="font-body text-xs text-slate-400 mt-3">Faculty register me save karegi tab Attendance page me dikhegi.</p>
-            <button onClick={() => { setPhase('idle'); setResult(null) }} className="mt-4 rounded-lg border border-purple-200 px-4 py-2 font-body text-sm text-purple-700 hover:bg-purple-50">Theek hai</button>
+            <p className="font-body text-xs text-slate-400 mt-3">It will appear on the Attendance page once faculty saves it to the register.</p>
+            <button onClick={() => { setPhase('idle'); setResult(null) }} className="mt-4 rounded-lg border border-purple-200 px-4 py-2 font-body text-sm text-purple-700 hover:bg-purple-50">OK</button>
           </div>
         )}
 
         {phase === 'done' && !result && (
           <div className="text-center py-2">
             <XCircle size={48} className="mx-auto text-red-500" />
-            <p className="font-display text-lg text-slate-900 mt-2">Attendance nahi lagi</p>
+            <p className="font-display text-lg text-slate-900 mt-2">Attendance not taken</p>
             <p className="font-body text-sm text-red-600 mt-2">{error}</p>
-            <button onClick={begin} className="mt-4 rounded-lg bg-purple-600 px-5 py-2 font-body text-sm text-white hover:bg-purple-700">Dobara scan karo</button>
+            <button onClick={begin} className="mt-4 rounded-lg bg-purple-600 px-5 py-2 font-body text-sm text-white hover:bg-purple-700">Scan again</button>
           </div>
         )}
 
@@ -124,7 +124,7 @@ export default function StudentQrScanPage({ session }) {
 
       {history.length > 0 && (
         <div className="mt-5">
-          <p className="font-display text-base text-slate-900 mb-2">Mere pichhle scans</p>
+          <p className="font-display text-base text-slate-900 mb-2">My previous scans</p>
           <div className="bg-white rounded-xl border border-purple-100 shadow-sm divide-y divide-purple-50">
             {history.map((h, i) => (
               <div key={i} className="flex items-center justify-between px-4 py-3 font-body text-sm">
@@ -132,7 +132,7 @@ export default function StudentQrScanPage({ session }) {
                   <p className="text-slate-900">{h.subject}</p>
                   <p className="text-xs text-slate-500">{fmtDay(h.day)} · {fmtTime(h.scanned_at)} · {h.distance_m} m</p>
                 </div>
-                <span className={`text-xs ${h.in_register ? 'text-green-700' : 'text-slate-400'}`}>{h.in_register ? 'Register me' : 'Faculty ke save karne tak'}</span>
+                <span className={`text-xs ${h.in_register ? 'text-green-700' : 'text-slate-400'}`}>{h.in_register ? 'In register' : 'Pending faculty confirmation'}</span>
               </div>
             ))}
           </div>

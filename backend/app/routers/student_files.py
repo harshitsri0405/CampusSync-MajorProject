@@ -18,7 +18,7 @@ def _uuid(v):
     try:
         return uuid.UUID(v)
     except ValueError:
-        raise HTTPException(status_code=404, detail="File nahi mili.")
+        raise HTTPException(status_code=404, detail="File not found.")
 
 
 def _iso(v):
@@ -36,7 +36,7 @@ def exam_copies(student=Depends(get_current_student), db: Session = Depends(get_
 def exam_copy_file(copy_id: str, student=Depends(get_current_student), db: Session = Depends(get_db)):
     c = db.query(ExamCopy).filter(ExamCopy.id == _uuid(copy_id), ExamCopy.student_profile_id == student.id, ExamCopy.is_visible.is_(True)).first()
     if not c:
-        raise HTTPException(status_code=404, detail="Copy nahi mili.")
+        raise HTTPException(status_code=404, detail="Copy not found.")
     return FileResponse(path_of(COPY_FOLDER, c.stored_name), filename=c.file_name)
 
 
@@ -55,5 +55,5 @@ def assignment_files(student=Depends(get_current_student), db: Session = Depends
 def assignment_file(file_id: str, student=Depends(get_current_student), db: Session = Depends(get_db)):
     f = _mine_tasks(db, student).filter(TaskFile.id == _uuid(file_id)).first()
     if not f:
-        raise HTTPException(status_code=404, detail="File nahi mili.")
+        raise HTTPException(status_code=404, detail="File not found.")
     return FileResponse(path_of(TASK_FOLDER, f.stored_name), filename=f.file_name)

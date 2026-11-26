@@ -45,14 +45,14 @@ function MarkTab({ token, cls, day, setDay }) {
   function setAll(v) { setStatus(Object.fromEntries(items.map((s) => [s.id, v]))) }
 
   async function save() {
-    if (left > 0) return setError(`${left} students ki attendance baaki hai.`)
+    if (left > 0) return setError(`Attendance is pending for ${left} student(s).`)
     setBusy(true); setError(''); setOk('')
     try {
       const r = await saveFacultyAttendance(token, {
         assignment_id: cls.id, day,
         records: items.map((s) => ({ student_id: s.id, status: status[s.id] })),
       })
-      setOk(`Save ho gayi: ${r.present} present, ${r.absent} absent.`)
+      setOk(`Saved: ${r.present} present, ${r.absent} absent.`)
       await load()
     } catch (e) { setError(e.message) } finally { setBusy(false) }
   }
@@ -76,8 +76,8 @@ function MarkTab({ token, cls, day, setDay }) {
 
       {error && <p className="font-body text-sm text-red-600 mb-3">{error}</p>}
       {ok && <p className="font-body text-sm text-green-700 mb-3">{ok}</p>}
-      {sheet && sheet.marked && !locked && <p className="font-body text-sm text-amber-700 mb-3">Is din ki attendance pehle lag chuki hai. Badlaav karke dobara Save kar sakte ho.</p>}
-      {locked && <p className="font-body text-sm text-amber-700 mb-3">{sheet.edit_days} din se purani attendance sirf dekh sakte ho, badal nahi sakte.</p>}
+      {sheet && sheet.marked && !locked && <p className="font-body text-sm text-amber-700 mb-3">Attendance for this day has already been taken. You can edit it and save again.</p>}
+      {locked && <p className="font-body text-sm text-amber-700 mb-3">Attendance older than {sheet.edit_days} days is read-only and cannot be changed.</p>}
 
       {loading && <p className="font-body text-sm text-slate-500">Loading...</p>}
       {sheet && !loading && (
@@ -85,7 +85,7 @@ function MarkTab({ token, cls, day, setDay }) {
           <div className="flex flex-wrap gap-3 mb-3 font-body text-sm">
             <span className="rounded-lg bg-green-50 px-3 py-1.5 text-green-700">Present: {present}</span>
             <span className="rounded-lg bg-red-50 px-3 py-1.5 text-red-700">Absent: {absent}</span>
-            <span className="rounded-lg bg-slate-100 px-3 py-1.5 text-slate-600">Baaki: {left}</span>
+            <span className="rounded-lg bg-slate-100 px-3 py-1.5 text-slate-600">Pending: {left}</span>
           </div>
           <div className="bg-white rounded-xl border border-slate-200 shadow-sm overflow-x-auto">
             <table className="w-full font-body text-sm">
@@ -96,7 +96,7 @@ function MarkTab({ token, cls, day, setDay }) {
                 </tr>
               </thead>
               <tbody>
-                {items.length === 0 && <tr><td colSpan={4} className="px-4 py-8 text-center text-slate-500">Is class me koi student nahi hai.</td></tr>}
+                {items.length === 0 && <tr><td colSpan={4} className="px-4 py-8 text-center text-slate-500">This class has no students.</td></tr>}
                 {items.map((s, i) => {
                   const v = status[s.id]
                   return (
@@ -159,7 +159,7 @@ function HistoryTab({ token, cls, onEdit }) {
           </thead>
           <tbody>
             {loading && <tr><td colSpan={5} className="px-4 py-8 text-center text-slate-500">Loading...</td></tr>}
-            {!loading && data && data.items.length === 0 && <tr><td colSpan={5} className="px-4 py-8 text-center text-slate-500">Abhi tak is class ki attendance nahi lagi.</td></tr>}
+            {!loading && data && data.items.length === 0 && <tr><td colSpan={5} className="px-4 py-8 text-center text-slate-500">Attendance has not been taken for this class yet.</td></tr>}
             {!loading && data && data.items.map((r) => (
               <tr key={r.day} className="border-b border-slate-100 last:border-0 hover:bg-slate-50/60">
                 <td className="px-4 py-3 text-slate-900">{fmtDay(r.day)}</td>
@@ -168,7 +168,7 @@ function HistoryTab({ token, cls, onEdit }) {
                 <td className="px-4 py-3 text-right text-slate-700">{r.total}</td>
                 <td className="px-4 py-3 text-right">
                   <button className={`${OUTLINE} inline-flex items-center gap-1.5`} onClick={() => onEdit(r.day)}>
-                    <Pencil size={13} /> {r.editable ? 'Edit' : 'Dekho'}
+                    <Pencil size={13} /> {r.editable ? 'Edit' : 'View'}
                   </button>
                 </td>
               </tr>
@@ -178,7 +178,7 @@ function HistoryTab({ token, cls, onEdit }) {
       </div>
       {data && (
         <div className="flex items-center justify-between mt-3 font-body text-sm text-slate-500">
-          <span>Total: {data.total} din</span>
+          <span>Total: {data.total} days</span>
           <div className="flex items-center gap-2">
             <button className={OUTLINE} disabled={page <= 1} onClick={() => setPage(page - 1)}>Previous</button>
             <span>Page {page} / {pages}</span>
@@ -216,7 +216,7 @@ function ReportTab({ token, cls }) {
           <input className={INPUT} type="month" value={month} onChange={(e) => setMonth(e.target.value)} />
         </div>
         <button className={`${OUTLINE} flex items-center gap-1.5`} disabled={busy || !data || data.days.length === 0} onClick={download}>
-          <Download size={15} /> {busy ? 'Download ho raha hai...' : 'CSV download'}
+          <Download size={15} /> {busy ? 'Downloading...' : 'CSV download'}
         </button>
       </div>
 
@@ -247,7 +247,7 @@ function ReportTab({ token, cls }) {
                 </tr>
               </thead>
               <tbody>
-                {data.rows.length === 0 && <tr><td colSpan={data.days.length + 4} className="px-4 py-8 text-center text-slate-500">Is class me koi student nahi hai.</td></tr>}
+                {data.rows.length === 0 && <tr><td colSpan={data.days.length + 4} className="px-4 py-8 text-center text-slate-500">This class has no students.</td></tr>}
                 {data.rows.map((r) => (
                   <tr key={r.id} className="border-b border-slate-100 last:border-0">
                     <td className="px-3 py-2.5 text-slate-900 whitespace-nowrap">{r.name}<span className="block text-xs text-slate-400">{r.college_id}</span></td>
@@ -263,7 +263,7 @@ function ReportTab({ token, cls }) {
               </tbody>
             </table>
           </div>
-          {data.days.length === 0 && <p className="font-body text-sm text-slate-500 mt-3">Is mahine me abhi koi attendance nahi lagi.</p>}
+          {data.days.length === 0 && <p className="font-body text-sm text-slate-500 mt-3">No attendance has been taken this month yet.</p>}
         </>
       )}
     </div>
@@ -325,17 +325,17 @@ function LeaderboardTab({ token, cls }) {
           <div>
             <p className="font-body text-xs text-slate-500 mb-1">Kiski attendance</p>
             <select className={INPUT} value={scope} onChange={(e) => setScope(e.target.value)}>
-              <option value="subject">Sirf mera subject ({cls.subject})</option>
+              <option value="subject">My subject only ({cls.subject})</option>
               <option value="class">Poori class (saare subjects)</option>
             </select>
           </div>
           <div>
             <p className="font-body text-xs text-slate-500 mb-1">Period</p>
             <select className={INPUT} value={period} onChange={(e) => setPeriod(e.target.value)}>
-              <option value="all">Shuru se ab tak</option>
-              <option value="month">Is mahine</option>
-              <option value="30">Pichhle 30 din</option>
-              <option value="custom">Apni date range</option>
+              <option value="all">All time</option>
+              <option value="month">This month</option>
+              <option value="30">Last 30 days</option>
+              <option value="custom">Custom date range</option>
             </select>
           </div>
           {period === 'custom' && (
@@ -346,7 +346,7 @@ function LeaderboardTab({ token, cls }) {
           )}
         </div>
         <button className={`${OUTLINE} flex items-center gap-1.5`} disabled={busy || !data || items.length === 0} onClick={download}>
-          <Download size={15} /> {busy ? 'Download ho raha hai...' : 'CSV download'}
+          <Download size={15} /> {busy ? 'Downloading...' : 'CSV download'}
         </button>
       </div>
 
@@ -357,7 +357,7 @@ function LeaderboardTab({ token, cls }) {
         <>
           {s.with_data === 0 ? (
             <div className="bg-white rounded-xl border border-slate-200 p-8 text-center font-body text-sm text-slate-500 mb-4">
-              Is filter me abhi kisi student ki attendance nahi lagi, isliye leaderboard nahi ban sakta.
+              No attendance has been recorded for this filter yet, so the leaderboard cannot be generated.
             </div>
           ) : (
             <>
@@ -378,9 +378,9 @@ function LeaderboardTab({ token, cls }) {
 
               <div className="flex flex-wrap gap-3 mb-4 font-body text-sm">
                 <span className="rounded-lg bg-slate-100 px-3 py-1.5 text-slate-700">Class average: {s.avg_pct}%</span>
-                <span className="rounded-lg bg-green-50 px-3 py-1.5 text-green-700">Sabse zyada: {s.highest.name} ({s.highest.pct}%)</span>
-                <span className="rounded-lg bg-red-50 px-3 py-1.5 text-red-700">Sabse kam: {s.lowest.name} ({s.lowest.pct}%)</span>
-                <span className="rounded-lg bg-amber-50 px-3 py-1.5 text-amber-700">{s.threshold}% se kam: {s.below_threshold} students</span>
+                <span className="rounded-lg bg-green-50 px-3 py-1.5 text-green-700">Highest: {s.highest.name} ({s.highest.pct}%)</span>
+                <span className="rounded-lg bg-red-50 px-3 py-1.5 text-red-700">Lowest: {s.lowest.name} ({s.lowest.pct}%)</span>
+                <span className="rounded-lg bg-amber-50 px-3 py-1.5 text-amber-700">Below {s.threshold}%: {s.below_threshold} students</span>
               </div>
             </>
           )}
@@ -395,7 +395,7 @@ function LeaderboardTab({ token, cls }) {
                 </tr>
               </thead>
               <tbody>
-                {items.length === 0 && <tr><td colSpan={6} className="px-4 py-8 text-center text-slate-500">Is class me koi student nahi hai.</td></tr>}
+                {items.length === 0 && <tr><td colSpan={6} className="px-4 py-8 text-center text-slate-500">This class has no students.</td></tr>}
                 {items.map((r) => (
                   <tr key={r.id} className={`border-b border-slate-100 last:border-0 ${r.low ? 'bg-red-50/40' : ''}`}>
                     <td className="px-4 py-2.5 text-slate-700 font-medium">{r.rank === null ? '-' : `#${r.rank}`}</td>
@@ -405,7 +405,7 @@ function LeaderboardTab({ token, cls }) {
                     <td className="px-4 py-2.5 text-right text-slate-700">{r.total}</td>
                     <td className="px-4 py-2.5 w-64">
                       {r.pct === null ? (
-                        <span className="text-xs text-slate-400">Data nahi</span>
+                        <span className="text-xs text-slate-400">No data</span>
                       ) : (
                         <div className="flex items-center gap-2">
                           <span className="block flex-1 h-2 rounded-full bg-slate-100 overflow-hidden">
@@ -449,8 +449,8 @@ export default function FacultyAttendancePage({ session }) {
   if (classes.length === 0) {
     return (
       <div className="bg-white rounded-xl border border-slate-200 p-8 text-center max-w-xl mx-auto">
-        <p className="font-display text-base text-slate-900 mb-1">Abhi koi class assign nahi hai</p>
-        <p className="font-body text-sm text-slate-500">Pehle Dashboard ya My Classes se sample classes banao.</p>
+        <p className="font-display text-base text-slate-900 mb-1">No classes are assigned yet</p>
+        <p className="font-body text-sm text-slate-500">First create sample classes from the Dashboard or My Classes.</p>
       </div>
     )
   }
@@ -459,7 +459,7 @@ export default function FacultyAttendancePage({ session }) {
     <div className="max-w-5xl mx-auto">
       <div className="bg-white rounded-xl border border-slate-200 shadow-sm p-4 mb-4 flex flex-wrap items-end justify-between gap-3">
         <div>
-          <p className="font-body text-xs text-slate-500 mb-1">Class aur subject</p>
+          <p className="font-body text-xs text-slate-500 mb-1">Class and subject</p>
           <select className={`${INPUT} w-80 max-w-full`} value={classId} onChange={(e) => setClassId(e.target.value)}>
             {classes.map((c) => <option key={c.id} value={c.id}>{c.course} · Sem {c.semester} · {c.subject}{c.is_sample ? ' (SAMPLE)' : ''}</option>)}
           </select>

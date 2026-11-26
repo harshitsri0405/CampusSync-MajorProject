@@ -164,10 +164,10 @@ def update(complaint_id: str, payload: schemas.FacultyComplaintUpdateIn, faculty
 def download(complaint_id: str, attachment_id: str, faculty=Depends(require_faculty), db: Session = Depends(get_db)):
     c, _p = _my_complaint(db, faculty, complaint_id)
     A = models.ComplaintAttachment
-    a = db.query(A).filter(A.id == _uuid(attachment_id, "File nahi mili."), A.complaint_id == c.id).first()
+    a = db.query(A).filter(A.id == _uuid(attachment_id, "File not found."), A.complaint_id == c.id).first()
     if not a:
-        raise HTTPException(status_code=404, detail="File nahi mili.")
+        raise HTTPException(status_code=404, detail="File not found.")
     path = (UPLOAD_ROOT / str(c.student_profile_id) / a.file_path).resolve()
     if UPLOAD_ROOT.resolve() not in path.parents or not path.is_file():
-        raise HTTPException(status_code=404, detail="File server par nahi mili.")
+        raise HTTPException(status_code=404, detail="File not found on the server.")
     return FileResponse(str(path), filename=a.file_name)

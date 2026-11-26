@@ -328,7 +328,7 @@ export default function StudentAssignmentsPage({ session, onBack }) {
                             onClick={() => downloadStudentAssignmentFile(token, f.id, f.file_name).catch((e) => setError(e.message))}
                             className="mt-3 flex items-center gap-2 font-body text-sm text-purple-700 hover:text-purple-900"
                           >
-                            <Paperclip size={14} /> Faculty ki file: {f.file_name} <Download size={14} />
+                            <Paperclip size={14} /> Faculty file: {f.file_name} <Download size={14} />
                           </button>
                         ))}
 

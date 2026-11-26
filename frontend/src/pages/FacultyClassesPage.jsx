@@ -47,7 +47,7 @@ function StudentList({ token, cls, onBack }) {
           </thead>
           <tbody>
             {loading && <tr><td colSpan={5} className="px-4 py-8 text-center text-slate-500">Loading...</td></tr>}
-            {!loading && data && data.items.length === 0 && <tr><td colSpan={5} className="px-4 py-8 text-center text-slate-500">Koi student nahi mila.</td></tr>}
+            {!loading && data && data.items.length === 0 && <tr><td colSpan={5} className="px-4 py-8 text-center text-slate-500">No students found.</td></tr>}
             {!loading && data && data.items.map((s, i) => (
               <tr key={s.id} className="border-b border-slate-100 last:border-0 hover:bg-slate-50/60">
                 <td className="px-4 py-3 text-slate-400">{(page - 1) * 10 + i + 1}</td>
@@ -104,7 +104,7 @@ export default function FacultyClassesPage({ session }) {
 
       {items.length === 0 ? (
         <div className="bg-white rounded-xl border border-slate-200 p-8 text-center">
-          <p className="font-display text-base text-slate-900 mb-1">Abhi koi class assign nahi hai</p>
+          <p className="font-display text-base text-slate-900 mb-1">No classes are assigned yet</p>
           <p className="font-body text-sm text-slate-500 mb-4">Admin classes assign karta hai. Testing ke liye sample classes bana sakte ho.</p>
           <button className="rounded-md bg-green-600 px-4 py-2 font-body text-sm text-white hover:bg-green-700 disabled:opacity-60" disabled={busy} onClick={seed}>
             {busy ? 'Ban rahi hain...' : 'Load sample classes'}

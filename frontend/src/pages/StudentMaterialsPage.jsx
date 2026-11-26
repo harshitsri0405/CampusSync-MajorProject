@@ -40,17 +40,17 @@ export default function StudentMaterialsPage({ session }) {
     <div className="max-w-5xl mx-auto">
       <div className="mb-4">
         <h1 className="font-display text-2xl text-slate-900">Study Materials</h1>
-        <p className="font-body text-sm text-slate-500">Tumhare course aur semester ke notes, PPT aur previous year papers.</p>
+        <p className="font-body text-sm text-slate-500">Notes, presentations and previous year papers for your course and semester.</p>
       </div>
 
       <div className="flex flex-wrap items-center gap-3 mb-4">
-        <input className={`${INPUT} w-64`} placeholder="Title se search karo" value={q} onChange={(e) => setQ(e.target.value)} />
+        <input className={`${INPUT} w-64`} placeholder="Search by title" value={q} onChange={(e) => setQ(e.target.value)} />
         <select className={INPUT} value={subject} onChange={(e) => setSubject(e.target.value)}>
           <option value="">Saare subjects</option>
           {subjects.map((s) => <option key={s} value={s}>{s}</option>)}
         </select>
         <select className={INPUT} value={category} onChange={(e) => setCategory(e.target.value)}>
-          <option value="">Saari categories</option>
+          <option value="">All categories</option>
           {categories.map((c) => <option key={c} value={c}>{c}</option>)}
         </select>
       </div>
@@ -60,7 +60,7 @@ export default function StudentMaterialsPage({ session }) {
 
       {!loading && items.length === 0 && (
         <div className="bg-white rounded-xl border border-purple-100 p-8 text-center font-body text-sm text-slate-500">
-          Abhi koi study material available nahi hai.
+          No study materials are available yet.
         </div>
       )}
 

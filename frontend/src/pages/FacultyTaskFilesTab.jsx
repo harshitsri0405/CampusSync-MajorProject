@@ -35,20 +35,20 @@ export default function FacultyTaskFilesTab({ session }) {
   async function upload(task, file) {
     if (!file) return
     setError(''); setOk('')
-    if (data && file.size > data.max_mb * 1048576) return setError(`File ${data.max_mb} MB se badi hai.`)
+    if (data && file.size > data.max_mb * 1048576) return setError(`The file is larger than ${data.max_mb} MB.`)
     setBusyId(task.id)
     try {
       const fd = new FormData()
       fd.append('assignment_id', task.id)
       fd.append('file', file)
       await facultyTaskFileUpload(token, fd)
-      setOk('File attach ho gayi. Students ko notification bhej diya.')
+      setOk('File attached. Students have been notified.')
       await load()
     } catch (e) { setError(e.message) } finally { setBusyId('') }
   }
 
   async function remove(f) {
-    if (!window.confirm(`"${f.file_name}" hata dein?`)) return
+    if (!window.confirm(`Remove "${f.file_name}"?`)) return
     setError(''); setOk('')
     try { await facultyTaskFileDelete(token, f.id); await load() } catch (e) { setError(e.message) }
   }
@@ -60,21 +60,21 @@ export default function FacultyTaskFilesTab({ session }) {
 
   if (loading) return <p className="font-body text-sm text-slate-500">Loading...</p>
   if (classes.length === 0) {
-    return <div className="bg-white rounded-xl border border-slate-200 p-8 text-center font-body text-sm text-slate-500">Abhi koi class assign nahi hai.</div>
+    return <div className="bg-white rounded-xl border border-slate-200 p-8 text-center font-body text-sm text-slate-500">No classes are assigned yet.</div>
   }
 
   return (
     <div>
       <div className="bg-white rounded-xl border border-slate-200 shadow-sm p-4 mb-4">
-        <p className="font-body text-xs text-slate-500 mb-1">Class aur subject</p>
+        <p className="font-body text-xs text-slate-500 mb-1">Class and subject</p>
         <select className={`${INPUT} w-80 max-w-full`} value={classId} onChange={(e) => setClassId(e.target.value)}>
           {classes.map((c) => <option key={c.id} value={c.id}>{c.course} · Sem {c.semester} · {c.subject}{c.is_sample ? ' (SAMPLE)' : ''}</option>)}
         </select>
       </div>
 
       <p className="font-body text-xs text-slate-500 mb-3">
-        Apni banayi hui assignment me question paper ya reference file attach karo (PDF, DOC, PPT, XLS, TXT, image; max {data ? data.max_mb : 10} MB,
-        ek assignment me {data ? data.max_files : 3} files tak). Students ko ye Assignments page me dikhegi.
+        Attach a question paper or reference file to your assignment (PDF, DOC, PPT, XLS, TXT, image; max {data ? data.max_mb : 10} MB,
+        up to {data ? data.max_files : 3} files per assignment). Students will see them on the Assignments page.
       </p>
 
       {error && <p className="font-body text-sm text-red-600 mb-3">{error}</p>}
@@ -83,7 +83,7 @@ export default function FacultyTaskFilesTab({ session }) {
       <div className="space-y-3">
         {data && data.items.length === 0 && (
           <div className="bg-white rounded-xl border border-slate-200 p-8 text-center font-body text-sm text-slate-500">
-            Is class me abhi aapne koi assignment nahi banayi. Pehle "Assignments" tab me banao.
+            You have not created any assignments for this class yet. Create one in the Assignments tab first.
           </div>
         )}
         {data && data.items.map((t) => (
@@ -93,10 +93,10 @@ export default function FacultyTaskFilesTab({ session }) {
                 <p className="font-display text-base text-slate-900">{t.title}</p>
                 <p className="font-body text-xs text-slate-500 mt-0.5">Deadline: {fmtDue(t.due_at)}</p>
               </div>
-              {busyId === t.id ? <span className="text-xs text-slate-500">Upload ho raha hai...</span> : (
+              {busyId === t.id ? <span className="text-xs text-slate-500">Uploading...</span> : (
                 data.items && t.files.length < data.max_files && (
                   <label className={`${OUTLINE} inline-flex items-center gap-1.5 cursor-pointer`}>
-                    <Upload size={14} /> File attach karo
+                    <Upload size={14} /> Attach file
                     <input type="file" className="hidden" onChange={(e) => { const f = e.target.files[0]; e.target.value = ''; upload(t, f) }} />
                   </label>
                 )
@@ -108,8 +108,8 @@ export default function FacultyTaskFilesTab({ session }) {
                   <div key={f.id} className="flex flex-wrap items-center justify-between gap-2 rounded-lg bg-slate-50 px-3 py-2 font-body text-sm">
                     <span className="flex items-center gap-2 text-slate-700"><Paperclip size={14} /> {f.file_name} <span className="text-xs text-slate-400">{fmtSize(f.size)}</span></span>
                     <span className="flex gap-2">
-                      <button className={`${OUTLINE} inline-flex items-center gap-1.5`} onClick={() => download(f)}><Download size={14} /> Dekho</button>
-                      <button className={`${OUTLINE} inline-flex items-center gap-1.5 text-red-600`} onClick={() => remove(f)}><Trash2 size={14} /> Hatao</button>
+                      <button className={`${OUTLINE} inline-flex items-center gap-1.5`} onClick={() => download(f)}><Download size={14} /> View</button>
+                      <button className={`${OUTLINE} inline-flex items-center gap-1.5 text-red-600`} onClick={() => remove(f)}><Trash2 size={14} /> Remove</button>
                     </span>
                   </div>
                 ))}

@@ -48,7 +48,7 @@ def _topics(u) -> list:
     return out
 
 
-def _uuid(v, msg="Nahi mila."):
+def _uuid(v, msg="Not found."):
     try:
         return uuid.UUID(str(v))
     except ValueError:
@@ -136,16 +136,16 @@ def completion(db: Session, a) -> Optional[dict]:
 
 
 def _unit(db: Session, s, unit_id: str):
-    u = db.query(U).filter(U.id == _uuid(unit_id, "Unit nahi mili."), U.subject_id == s.id).first()
+    u = db.query(U).filter(U.id == _uuid(unit_id, "Unit not found."), U.subject_id == s.id).first()
     if not u:
-        raise HTTPException(status_code=404, detail="Unit nahi mili.")
+        raise HTTPException(status_code=404, detail="Unit not found.")
     return u
 
 
 def _need_subject(db: Session, a):
     s, _how = _subject_for(db, a)
     if not s:
-        raise HTTPException(status_code=400, detail="Is class ko pehle syllabus subject se jodo.")
+        raise HTTPException(status_code=400, detail="Link this class to a syllabus subject first.")
     return s
 
 
@@ -161,9 +161,9 @@ def planner(assignment_id: str, faculty=Depends(require_faculty), db: Session = 
 @router.post("/link")
 def link(body: FacultyPlanLinkIn, faculty=Depends(require_faculty), db: Session = Depends(get_db)):
     a = my_assignment(db, faculty, body.assignment_id)
-    s = db.query(S).filter(S.id == _uuid(body.subject_id, "Subject nahi mila.")).first()
+    s = db.query(S).filter(S.id == _uuid(body.subject_id, "Subject not found.")).first()
     if not s or norm(s.course) != norm(a.course) or s.semester != a.semester:
-        raise HTTPException(status_code=400, detail="Ye subject is class ke course/semester ka nahi hai.")
+        raise HTTPException(status_code=400, detail="This subject does not belong to this class's course/semester.")
     row = db.query(PL).filter(PL.assignment_id == a.id).first()
     if row:
         row.subject_id = s.id
@@ -186,7 +186,7 @@ def unit_plan(body: FacultyPlanUnitIn, faculty=Depends(require_faculty), db: Ses
     a = my_assignment(db, faculty, body.assignment_id)
     u = _unit(db, _need_subject(db, a), body.unit_id)
     if body.planned_start and body.planned_end and body.planned_start > body.planned_end:
-        raise HTTPException(status_code=400, detail="Start date end date se pehle honi chahiye.")
+        raise HTTPException(status_code=400, detail="The start date must be on or before the end date.")
     row = db.query(PU).filter(PU.assignment_id == a.id, PU.unit_id == u.id).first()
     if not row:
         row = PU(assignment_id=a.id, unit_id=u.id)
@@ -203,10 +203,10 @@ def set_topics(body: FacultyPlanTopicsIn, faculty=Depends(require_faculty), db: 
     text = dict(_topics(u))
     keys = list(dict.fromkeys(body.keys))
     if any(k not in text for k in keys):
-        raise HTTPException(status_code=400, detail="Topic syllabus se match nahi karta (syllabus badal gaya hoga). Page refresh karo.")
+        raise HTTPException(status_code=400, detail="The topic does not match the syllabus (it may have changed). Please refresh the page.")
     when = body.done_on or _today()
     if when > _today():
-        raise HTTPException(status_code=400, detail="Aage ki date nahi chun sakte.")
+        raise HTTPException(status_code=400, detail="Future dates cannot be selected.")
     existing = {r.topic_key: r for r in db.query(PT).filter(PT.assignment_id == a.id, PT.unit_id == u.id, PT.topic_key.in_(keys)).all()}
     if body.done:
         for k in keys:
@@ -224,7 +224,7 @@ def export(assignment_id: str, faculty=Depends(require_faculty), db: Session = D
     a = my_assignment(db, faculty, assignment_id)
     d = _build(db, a)
     if d is None:
-        raise HTTPException(status_code=400, detail="Is class ko pehle syllabus subject se jodo.")
+        raise HTTPException(status_code=400, detail="Link this class to a syllabus subject first.")
     buf = io.StringIO()
     w = csv.writer(buf)
     w.writerow([f"Course planner - {a.course} Sem {a.semester} - {d['subject']['name']} ({d['subject']['code']})"])
@@ -234,7 +234,7 @@ def export(assignment_id: str, faculty=Depends(require_faculty), db: Session = D
     for u in d["units"]:
         for t in u["topics"]:
             w.writerow([u["unit_no"], _safe(u["title"]), u["planned_start"] or "", u["planned_end"] or "", _safe(t["text"]),
-                        "Done" if t["done"] else "Baaki", t["done_on"] or ""])
+                        "Done" if t["done"] else "Pending", t["done_on"] or ""])
     fname = re.sub(r"[^A-Za-z0-9_-]+", "-", f"planner-{d['subject']['code']}").strip("-")
     return Response(content="\ufeff" + buf.getvalue(), media_type="text/csv; charset=utf-8",
                     headers={"Content-Disposition": f'attachment; filename="{fname}.csv"'})

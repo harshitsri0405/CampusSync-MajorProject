@@ -59,7 +59,7 @@ function TaskForm({ token, classes, task, onDone, onCancel }) {
       {error && <p className="font-body text-sm text-red-600">{error}</p>}
       {!editing && (
         <div>
-          <label className="font-body text-sm text-slate-600 mb-1 block">Class aur subject</label>
+          <label className="font-body text-sm text-slate-600 mb-1 block">Class and subject</label>
           <select className={INPUT} value={f.class_id} onChange={(e) => setF({ ...f, class_id: e.target.value })}>
             {classes.map((c) => <option key={c.id} value={c.id}>{c.course} · Sem {c.semester} · {c.subject}{c.is_sample ? ' (SAMPLE)' : ''}</option>)}
           </select>
@@ -151,7 +151,7 @@ function Detail({ token, id, onBack }) {
         <span className="rounded-lg bg-blue-50 px-3 py-1.5 text-blue-700">Submitted: {s.submitted}</span>
         <span className="rounded-lg bg-green-50 px-3 py-1.5 text-green-700">Graded: {s.graded}</span>
         <span className="rounded-lg bg-amber-50 px-3 py-1.5 text-amber-700">Late: {s.late}</span>
-        <span className="rounded-lg bg-red-50 px-3 py-1.5 text-red-600">Baaki: {s.pending}</span>
+        <span className="rounded-lg bg-red-50 px-3 py-1.5 text-red-600">Pending: {s.pending}</span>
       </div>
 
       {error && <p className="font-body text-sm text-red-600 mb-3">{error}</p>}
@@ -188,7 +188,7 @@ function Detail({ token, id, onBack }) {
             </tr>
           </thead>
           <tbody>
-            {data.items.length === 0 && <tr><td colSpan={6} className="px-4 py-8 text-center text-slate-500">Is class me koi student nahi hai.</td></tr>}
+            {data.items.length === 0 && <tr><td colSpan={6} className="px-4 py-8 text-center text-slate-500">This class has no students.</td></tr>}
             {data.items.map((r) => {
               const [cls, label] = STATUS[r.status]
               return (
@@ -257,7 +257,7 @@ export default function FacultyAssignmentsPage({ session }) {
 
       {error && <p className="font-body text-sm text-red-600 mb-3">{error}</p>}
       {ok && <p className="font-body text-sm text-green-700 mb-3">{ok}</p>}
-      {classes.length === 0 && !loading && <p className="font-body text-sm text-slate-500 mb-3">Pehle Dashboard ya My Classes se sample classes banao.</p>}
+      {classes.length === 0 && !loading && <p className="font-body text-sm text-slate-500 mb-3">First create sample classes from the Dashboard or My Classes.</p>}
 
       {form && (
         <TaskForm token={token} classes={classes} task={form === 'new' ? null : form} onCancel={() => setForm(null)}
@@ -288,7 +288,7 @@ export default function FacultyAssignmentsPage({ session }) {
                 <td className="px-4 py-3 text-right text-slate-700">{t.graded}/{t.submitted}</td>
                 <td className="px-4 py-3">
                   <div className="flex justify-end gap-2">
-                    <button className={OUTLINE} onClick={() => setOpenId(t.id)}>Dekho</button>
+                    <button className={OUTLINE} onClick={() => setOpenId(t.id)}>View</button>
                     <button className={OUTLINE} aria-label="Edit" onClick={() => { setForm(t); setOk('') }}><Pencil size={14} /></button>
                     <button className={`${OUTLINE} text-red-600`} aria-label="Delete" onClick={() => remove(t)}><Trash2 size={14} /></button>
                   </div>

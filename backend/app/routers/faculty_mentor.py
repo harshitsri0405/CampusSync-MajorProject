@@ -158,7 +158,7 @@ def attachment(attachment_id: str, faculty=Depends(require_faculty), db: Session
     _mentee(db, faculty, str(m.student_profile_id))
     path = _file_path(a)
     if path is None:
-        raise HTTPException(status_code=404, detail="File server par nahi mili.")
+        raise HTTPException(status_code=404, detail="File not found on the server.")
     return FileResponse(path, filename=_att_name(a))
 
 

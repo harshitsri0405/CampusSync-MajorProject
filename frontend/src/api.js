@@ -1778,3 +1778,54 @@ export function facultyAnalyticsStudent(token, assignmentId, studentId) {
 export function downloadFacultyAnalyticsCsv(token, assignmentId) {
   return _downloadCsv(`/faculty/analytics/export?assignment_id=${encodeURIComponent(assignmentId)}`, token, 'student-performance.csv')
 }
+
+function wardenQs(params = {}) {
+  const q = new URLSearchParams()
+  Object.entries(params).forEach(([k, v]) => { if (v !== '' && v !== null && v !== undefined) q.set(k, v) })
+  return q.toString()
+}
+export function facultyHostelAccess(token) {
+  return authedRequest('/faculty/hostel/access', token)
+}
+export function facultyHostelDashboard(token) {
+  return authedRequest('/faculty/hostel/dashboard', token)
+}
+export function facultyHostelWardens(token) {
+  return authedRequest('/faculty/hostel/wardens', token)
+}
+export function facultyHostelList(token) {
+  return authedRequest('/faculty/hostel/hostels', token)
+}
+export function facultyHostelCreate(token, values) {
+  return authedRequest('/faculty/hostel/hostels', token, { method: 'POST', body: JSON.stringify(values) })
+}
+export function facultyHostelUpdate(token, id, values) {
+  return authedRequest(`/faculty/hostel/hostels/${id}`, token, { method: 'PUT', body: JSON.stringify(values) })
+}
+export function facultyHostelDelete(token, id) {
+  return authedRequest(`/faculty/hostel/hostels/${id}`, token, { method: 'DELETE' })
+}
+export function facultyHostelRooms(token, params) {
+  return authedRequest(`/faculty/hostel/rooms?${wardenQs(params)}`, token)
+}
+export function facultyHostelRoomCreate(token, values) {
+  return authedRequest('/faculty/hostel/rooms', token, { method: 'POST', body: JSON.stringify(values) })
+}
+export function facultyHostelRoomUpdate(token, id, values) {
+  return authedRequest(`/faculty/hostel/rooms/${id}`, token, { method: 'PUT', body: JSON.stringify(values) })
+}
+export function facultyHostelRoomDelete(token, id) {
+  return authedRequest(`/faculty/hostel/rooms/${id}`, token, { method: 'DELETE' })
+}
+export function adminWardenList(token) {
+  return authedRequest('/admin/wardens', token)
+}
+export function adminWardenCreate(token, values) {
+  return authedRequest('/admin/wardens', token, { method: 'POST', body: JSON.stringify(values) })
+}
+export function adminWardenSetActive(token, id, active) {
+  return authedRequest(`/admin/wardens/${id}/active`, token, { method: 'POST', body: JSON.stringify({ active }) })
+}
+export function adminWardenResetPassword(token, id, password) {
+  return authedRequest(`/admin/wardens/${id}/password`, token, { method: 'POST', body: JSON.stringify({ password }) })
+}

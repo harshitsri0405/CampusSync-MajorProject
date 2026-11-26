@@ -12,14 +12,14 @@ UPLOAD_ROOT = Path("uploads")
 def read_upload(file: UploadFile, allowed: set, max_mb: int):
     ext = Path(file.filename or "").suffix.lower()
     if ext not in allowed:
-        raise HTTPException(status_code=400, detail="Ye file type allowed nahi hai. Allowed: " + ", ".join(sorted(e.lstrip(".") for e in allowed)))
+        raise HTTPException(status_code=400, detail="This file type is not allowed. Allowed: " + ", ".join(sorted(e.lstrip(".") for e in allowed)))
     data = file.file.read(max_mb * 1024 * 1024 + 1)
     if not data:
-        raise HTTPException(status_code=400, detail="File khali hai.")
+        raise HTTPException(status_code=400, detail="The file is empty.")
     if len(data) > max_mb * 1024 * 1024:
-        raise HTTPException(status_code=400, detail=f"File {max_mb} MB se badi hai.")
+        raise HTTPException(status_code=400, detail=f"The file is larger than {max_mb} MB.")
     if not _sig_ok(ext, data[:8]):
-        raise HTTPException(status_code=400, detail="File ka content uske type se match nahi karta.")
+        raise HTTPException(status_code=400, detail="The file content does not match its type.")
     clean = re.sub(r"[^A-Za-z0-9._ -]+", "_", Path(file.filename).name)[:150] or f"file{ext}"
     return data, ext, clean
 
@@ -35,7 +35,7 @@ def store(folder: str, data: bytes, ext: str) -> str:
 def path_of(folder: str, stored: str) -> Path:
     p = UPLOAD_ROOT / folder / stored
     if not p.is_file():
-        raise HTTPException(status_code=404, detail="File server par nahi mili.")
+        raise HTTPException(status_code=404, detail="File not found on the server.")
     return p
 
 

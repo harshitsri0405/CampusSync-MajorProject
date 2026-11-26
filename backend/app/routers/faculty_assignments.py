@@ -126,7 +126,7 @@ def create_task(payload: schemas.FacultyTaskIn, faculty=Depends(require_faculty)
         raise HTTPException(status_code=400, detail="Deadline aane wale samay ki honi chahiye.")
     students = _class_students(db, cls)
     if not students:
-        raise HTTPException(status_code=400, detail="Is class me koi student nahi hai.")
+        raise HTTPException(status_code=400, detail="This class has no students.")
     t = Task(course=cls.course, semester=str(cls.semester), subject=cls.subject, title=payload.title, description=payload.description,
              faculty_name=faculty.faculty_name, max_marks=payload.max_marks, due_at=due)
     db.add(t)
@@ -199,7 +199,7 @@ def submission_file(task_id: str, student_id: str, faculty=Depends(require_facul
         raise HTTPException(status_code=404, detail="Submission nahi mili.")
     path = _file_path(s)
     if path is None:
-        raise HTTPException(status_code=404, detail="File server par nahi mili.")
+        raise HTTPException(status_code=404, detail="File not found on the server.")
     return FileResponse(path, filename=s.file_name or path.name)
 
 

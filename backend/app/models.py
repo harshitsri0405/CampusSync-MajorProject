@@ -1383,4 +1383,57 @@ class FacultyPlanTopic(Base):
     topic_key: Mapped[str] = mapped_column(String(16))
     topic: Mapped[str] = mapped_column(String(500))
     done_on: Mapped[date] = mapped_column(Date)
+    
+class WardenAccount(Base):
+    __tablename__ = "warden_accounts"
+
+    id: Mapped[uuid.UUID] = mapped_column(primary_key=True, default=uuid.uuid4)
+    faculty_profile_id: Mapped[uuid.UUID] = mapped_column(unique=True, index=True)
+    phone: Mapped[str] = mapped_column(String(20), default="")
+    is_active: Mapped[bool] = mapped_column(Boolean, default=True)
+    created_by: Mapped[str] = mapped_column(String(100), default="")
+    created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), server_default=func.now())
+
+
+class WardenHostel(Base):
+    __tablename__ = "warden_hostels"
+
+    id: Mapped[uuid.UUID] = mapped_column(primary_key=True, default=uuid.uuid4)
+    name: Mapped[str] = mapped_column(String(120), unique=True)
+    hostel_type: Mapped[str] = mapped_column(String(20))
+    address: Mapped[str] = mapped_column(String(300), default="")
+    floors: Mapped[int] = mapped_column(Integer, default=1)
+    info: Mapped[str] = mapped_column(Text, default="")
+    warden_profile_id: Mapped[Optional[uuid.UUID]] = mapped_column(nullable=True)
+    contact_phone: Mapped[str] = mapped_column(String(20), default="")
+    created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), server_default=func.now())
+
+
+class WardenRoom(Base):
+    __tablename__ = "warden_rooms"
+    __table_args__ = (UniqueConstraint("hostel_id", "room_no", name="uq_warden_room_no"),)
+
+    id: Mapped[uuid.UUID] = mapped_column(primary_key=True, default=uuid.uuid4)
+    hostel_id: Mapped[uuid.UUID] = mapped_column(index=True)
+    room_no: Mapped[str] = mapped_column(String(20))
+    floor: Mapped[int] = mapped_column(Integer, default=0)
+    room_type: Mapped[str] = mapped_column(String(20))
+    capacity: Mapped[int] = mapped_column(Integer)
+    is_active: Mapped[bool] = mapped_column(Boolean, default=True)
+    notes: Mapped[str] = mapped_column(String(200), default="")
+    created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), server_default=func.now())
+
+
+class WardenAllocation(Base):
+    __tablename__ = "warden_allocations"
+
+    id: Mapped[uuid.UUID] = mapped_column(primary_key=True, default=uuid.uuid4)
+    student_profile_id: Mapped[uuid.UUID] = mapped_column(index=True)
+    room_id: Mapped[uuid.UUID] = mapped_column(index=True)
+    allocated_on: Mapped[date] = mapped_column(Date)
+    vacated_on: Mapped[Optional[date]] = mapped_column(Date, nullable=True)
+    status: Mapped[str] = mapped_column(String(20), default="active", index=True)
+    note: Mapped[str] = mapped_column(String(200), default="")
+    created_by: Mapped[str] = mapped_column(String(100), default="")
+    created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), server_default=func.now())
 

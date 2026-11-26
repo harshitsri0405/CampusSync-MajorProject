@@ -14,8 +14,8 @@ const todayStr = () => new Date().toLocaleDateString('en-CA')
 const fmtDay = (d) => (d ? new Date(`${d}T00:00:00`).toLocaleDateString('en-IN', { day: 'numeric', month: 'short' }) : '')
 const STATUS = {
   done: { label: 'Complete', cls: 'bg-green-100 text-green-700' },
-  in_progress: { label: 'Chal raha hai', cls: 'bg-blue-100 text-blue-700' },
-  pending: { label: 'Baaki', cls: 'bg-slate-100 text-slate-600' },
+  in_progress: { label: 'In progress', cls: 'bg-blue-100 text-blue-700' },
+  pending: { label: 'Pending', cls: 'bg-slate-100 text-slate-600' },
   behind: { label: 'Behind', cls: 'bg-red-100 text-red-700' },
 }
 
@@ -63,7 +63,7 @@ export default function FacultyPlannerPage({ session }) {
     run(async () => {
       await facultyPlannerUnitPlan(token, { assignment_id: classId, unit_id: unit.id, planned_start: start || null, planned_end: end || null })
       setPlan((x) => { const n = { ...x }; delete n[unit.id]; return n })
-    }, 'Plan save ho gaya.')
+    }, 'Plan saved.')
   }
 
   async function csv() {
@@ -75,8 +75,8 @@ export default function FacultyPlannerPage({ session }) {
   if (classes.length === 0) {
     return (
       <div className="bg-white rounded-xl border border-slate-200 p-8 text-center max-w-xl mx-auto">
-        <p className="font-display text-base text-slate-900 mb-1">Abhi koi class assign nahi hai</p>
-        <p className="font-body text-sm text-slate-500">Pehle Dashboard ya My Classes se sample classes banao.</p>
+        <p className="font-display text-base text-slate-900 mb-1">No classes are assigned yet</p>
+        <p className="font-body text-sm text-slate-500">First create sample classes from the Dashboard or My Classes.</p>
       </div>
     )
   }
@@ -87,7 +87,7 @@ export default function FacultyPlannerPage({ session }) {
     <div className="max-w-5xl mx-auto">
       <div className="bg-white rounded-xl border border-slate-200 shadow-sm p-4 mb-4 flex flex-wrap items-end justify-between gap-3">
         <div>
-          <p className="font-body text-xs text-slate-500 mb-1">Class aur subject</p>
+          <p className="font-body text-xs text-slate-500 mb-1">Class and subject</p>
           <select className={`${INPUT} w-80 max-w-full`} value={classId} onChange={(e) => setClassId(e.target.value)}>
             {classes.map((c) => <option key={c.id} value={c.id}>{c.course} · Sem {c.semester} · {c.subject}{c.is_sample ? ' (SAMPLE)' : ''}</option>)}
           </select>
@@ -100,21 +100,21 @@ export default function FacultyPlannerPage({ session }) {
 
       {data && !data.matched && (
         <div className="bg-white rounded-xl border border-slate-200 shadow-sm p-6">
-          <p className="font-display text-base text-slate-900 mb-1">Is class ka syllabus abhi juda nahi hai</p>
+          <p className="font-display text-base text-slate-900 mb-1">The syllabus is not linked to this class yet</p>
           {data.available.length === 0 ? (
             <p className="font-body text-sm text-slate-500">
-              {data.class.course} · Sem {data.class.semester} ka syllabus Admin ne abhi daala nahi hai. Admin → Syllabus me daalne ke baad yahan aayega.
+              The syllabus for {data.class.course} · Sem {data.class.semester} has not been added by the administrator yet. It will appear here once added under Admin → Syllabus.
             </p>
           ) : (
             <>
               <p className="font-body text-sm text-slate-500 mb-4">
-                "{data.class.subject}" naam ka koi syllabus subject nahi mila. Neeche se is class ka sahi subject chuno.
+                No syllabus subject named "{data.class.subject}" was found. Select the correct subject for this class below.
               </p>
               <div className="flex flex-wrap items-center gap-3">
                 <select className={`${INPUT} w-80 max-w-full`} value={pick} onChange={(e) => setPick(e.target.value)}>
                   {data.available.map((x) => <option key={x.id} value={x.id}>{x.code} · {x.name}</option>)}
                 </select>
-                <button className={PRIMARY} disabled={busy || !pick} onClick={() => run(() => facultyPlannerLink(token, { assignment_id: classId, subject_id: pick }), 'Syllabus jud gaya.')}>Syllabus jodo</button>
+                <button className={PRIMARY} disabled={busy || !pick} onClick={() => run(() => facultyPlannerLink(token, { assignment_id: classId, subject_id: pick }), 'Syllabus linked.')}>Link syllabus</button>
               </div>
             </>
           )}
@@ -127,15 +127,15 @@ export default function FacultyPlannerPage({ session }) {
             <div className="flex flex-wrap items-start justify-between gap-3">
               <div>
                 <p className="font-display text-lg text-slate-900">{data.subject.name}</p>
-                <p className="font-body text-xs text-slate-500">{data.subject.code} · {data.how === 'manual' ? 'Khud juda hua' : 'Apne aap match hua'}</p>
+                <p className="font-body text-xs text-slate-500">{data.subject.code} · {data.how === 'manual' ? 'Linked manually' : 'Matched automatically'}</p>
               </div>
               {data.how === 'manual' && (
-                <button className={OUTLINE} disabled={busy} onClick={() => run(() => facultyPlannerUnlink(token, classId), 'Link hata diya.')}>Link hatao</button>
+                <button className={OUTLINE} disabled={busy} onClick={() => run(() => facultyPlannerUnlink(token, classId), 'Link removed.')}>Remove link</button>
               )}
             </div>
             <div className="mt-4 flex items-end justify-between">
               <p className="font-display text-4xl text-slate-900">{s.pct}%<span className="font-body text-sm text-slate-500"> syllabus complete</span></p>
-              {s.expected_pct !== null && <p className="font-body text-xs text-slate-500">Plan ke hisaab se aaj tak {s.expected_pct}% hona chahiye</p>}
+              {s.expected_pct !== null && <p className="font-body text-xs text-slate-500">Planned completion by today: {s.expected_pct}%</p>}
             </div>
             <div className="relative mt-2 h-3 rounded-full bg-slate-100 overflow-hidden">
               <span className="block h-full bg-green-500 transition-all" style={{ width: `${Math.min(100, s.pct)}%` }} />
@@ -149,12 +149,12 @@ export default function FacultyPlannerPage({ session }) {
           </div>
 
           <div className="flex flex-wrap items-center gap-3 mb-3 font-body text-sm text-slate-600">
-            <span>Tick karne par topic ki date:</span>
+            <span>When ticked, the topic date is:</span>
             <input className={INPUT} type="date" max={todayStr()} value={doneOn} onChange={(e) => e.target.value && setDoneOn(e.target.value)} />
           </div>
 
           <div className="space-y-3">
-            {data.units.length === 0 && <div className="bg-white rounded-xl border border-slate-200 p-8 text-center font-body text-sm text-slate-500">Is subject me abhi koi unit nahi hai.</div>}
+            {data.units.length === 0 && <div className="bg-white rounded-xl border border-slate-200 p-8 text-center font-body text-sm text-slate-500">This subject has no units yet.</div>}
             {data.units.map((u) => {
               const st = STATUS[u.status]
               const isOpen = !!open[u.id]
@@ -183,16 +183,16 @@ export default function FacultyPlannerPage({ session }) {
                   {isOpen && (
                     <div className="border-t border-slate-100 p-4">
                       <div className="flex flex-wrap items-end gap-3 mb-4">
-                        <div><p className="font-body text-xs text-slate-500 mb-1">Plan: shuru</p><input className={INPUT} type="date" value={start} onChange={(e) => setPlan({ ...plan, [u.id]: { ...p, start: e.target.value } })} /></div>
-                        <div><p className="font-body text-xs text-slate-500 mb-1">Plan: khatam</p><input className={INPUT} type="date" value={end} onChange={(e) => setPlan({ ...plan, [u.id]: { ...p, end: e.target.value } })} /></div>
-                        {changed && <button className={PRIMARY} disabled={busy} onClick={() => savePlan(u)}>Plan save karo</button>}
+                        <div><p className="font-body text-xs text-slate-500 mb-1">Plan: start</p><input className={INPUT} type="date" value={start} onChange={(e) => setPlan({ ...plan, [u.id]: { ...p, start: e.target.value } })} /></div>
+                        <div><p className="font-body text-xs text-slate-500 mb-1">Plan: end</p><input className={INPUT} type="date" value={end} onChange={(e) => setPlan({ ...plan, [u.id]: { ...p, end: e.target.value } })} /></div>
+                        {changed && <button className={PRIMARY} disabled={busy} onClick={() => savePlan(u)}>Save plan</button>}
                         <div className="ml-auto flex gap-2">
                           <button className={OUTLINE} disabled={busy || u.total === 0 || u.done === u.total} onClick={() => setTopics(u, u.topics.filter((t) => !t.done).map((t) => t.key), true)}>Pura unit complete</button>
                           <button className={OUTLINE} disabled={busy || u.done === 0} onClick={() => setTopics(u, u.topics.filter((t) => t.done).map((t) => t.key), false)}>Reset</button>
                         </div>
                       </div>
                       <div className="divide-y divide-slate-100">
-                        {u.topics.length === 0 && <p className="font-body text-sm text-slate-500">Is unit me topics nahi likhe hain.</p>}
+                        {u.topics.length === 0 && <p className="font-body text-sm text-slate-500">No topics have been added to this unit.</p>}
                         {u.topics.map((t) => (
                           <label key={t.key} className="flex items-start gap-3 py-2.5 cursor-pointer">
                             <input type="checkbox" className="mt-1 h-4 w-4 accent-green-600" checked={t.done} disabled={busy} onChange={() => setTopics(u, [t.key], !t.done)} />

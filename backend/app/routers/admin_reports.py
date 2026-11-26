@@ -283,7 +283,7 @@ def _run(db: Session, key, course_id, semester, threshold, start, end):
     if threshold is None:
         threshold = get_setting(db, "min_attendance_pct")
     if start and end and start > end:
-        raise HTTPException(status_code=400, detail="Start date end date se pehle honi chahiye.")
+        raise HTTPException(status_code=400, detail="The start date must be on or before the end date.")
     course = None
     if course_id:
         try:

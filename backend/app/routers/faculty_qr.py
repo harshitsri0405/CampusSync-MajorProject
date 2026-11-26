@@ -70,10 +70,10 @@ def _own(db: Session, faculty, session_id: str):
     try:
         sid = uuid.UUID(session_id)
     except ValueError:
-        raise HTTPException(status_code=404, detail="Session nahi mili.")
+        raise HTTPException(status_code=404, detail="Session not found.")
     s = db.query(Q).filter(Q.id == sid).first()
     if not s:
-        raise HTTPException(status_code=404, detail="Session nahi mili.")
+        raise HTTPException(status_code=404, detail="Session not found.")
     a = my_assignment(db, faculty, str(s.assignment_id))
     return s, a
 
@@ -82,7 +82,7 @@ def _own(db: Session, faculty, session_id: str):
 def start(body: FacultyQrStartIn, faculty=Depends(require_faculty), db: Session = Depends(get_db)):
     a = my_assignment(db, faculty, body.assignment_id)
     if body.accuracy > MAX_FACULTY_ACC:
-        raise HTTPException(status_code=400, detail=f"Aapki location ki accuracy kam hai (±{int(body.accuracy)} m). Khuli jagah/WiFi on karke dobara try karo.")
+        raise HTTPException(status_code=400, detail=f"Your location accuracy is low (±{int(body.accuracy)} m). Move to an open area or turn on Wi-Fi/GPS and try again.")
     now = now_utc()
     db.query(Q).filter(Q.assignment_id == a.id, Q.closed_at.is_(None), Q.expires_at > now).update({"closed_at": now}, synchronize_session=False)
     s = Q(
@@ -124,7 +124,7 @@ def history(assignment_id: str, faculty=Depends(require_faculty), db: Session = 
 def code(session_id: str, faculty=Depends(require_faculty), db: Session = Depends(get_db)):
     s, _a = _own(db, faculty, session_id)
     if not is_active(s):
-        raise HTTPException(status_code=400, detail="Ye session band ho chuka hai.")
+        raise HTTPException(status_code=400, detail="This session has ended.")
     return {"code": make_code(s), "rotates_in": WINDOW - int(time.time()) % WINDOW}
 
 

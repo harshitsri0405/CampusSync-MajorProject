@@ -186,7 +186,7 @@ export default function AdminMentorPage({ session }) {
               </tr></thead>
               <tbody>
                 {loading && <tr><td colSpan={4} className="px-4 py-8 text-center text-slate-500">Loading...</td></tr>}
-                {!loading && data.items.length === 0 && <tr><td colSpan={4} className="px-4 py-10 text-center text-slate-500">Koi student nahi mila.</td></tr>}
+                {!loading && data.items.length === 0 && <tr><td colSpan={4} className="px-4 py-10 text-center text-slate-500">No students found.</td></tr>}
                 {!loading && data.items.map((s) => (
                   <tr key={s.student_id} className="border-b border-slate-100 last:border-0 hover:bg-slate-50/60">
                     <td className="px-4 py-3"><input type="checkbox" checked={selected.includes(s.student_id)} onChange={(e) => setSelected(e.target.checked ? [...selected, s.student_id] : selected.filter((id) => id !== s.student_id))} /></td>

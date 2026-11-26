@@ -173,7 +173,7 @@ function Collection({ token, courseId, semester, setError, setInfo, onChanged })
             {loading && <tr><td colSpan={6} className="px-4 py-8 text-center text-slate-500">Loading...</td></tr>}
             {!loading && data.items.length === 0 && (
               <tr><td colSpan={6} className="px-4 py-10 text-center text-slate-500">
-                {c && c.fees === 0 ? 'Is class ki fee structure nahi bani. "Fee Structure" tab me fees add karo.' : 'Koi student nahi mila.'}
+                {c && c.fees === 0 ? 'Is class ki fee structure nahi bani. "Fee Structure" tab me fees add karo.' : 'No students found.'}
               </td></tr>
             )}
             {!loading && data.items.map((r) => (

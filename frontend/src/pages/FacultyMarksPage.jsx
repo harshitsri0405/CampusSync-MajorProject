@@ -116,8 +116,8 @@ export default function FacultyMarksPage({ session }) {
   if (!loading && classes.length === 0) {
     return (
       <div className="bg-white rounded-xl border border-slate-200 p-8 text-center max-w-xl mx-auto">
-        <p className="font-display text-base text-slate-900 mb-1">Abhi koi class assign nahi hai</p>
-        <p className="font-body text-sm text-slate-500">Pehle Dashboard ya My Classes se sample classes banao.</p>
+        <p className="font-display text-base text-slate-900 mb-1">No classes are assigned yet</p>
+        <p className="font-body text-sm text-slate-500">First create sample classes from the Dashboard or My Classes.</p>
       </div>
     )
   }
@@ -126,7 +126,7 @@ export default function FacultyMarksPage({ session }) {
     <div className="max-w-6xl mx-auto">
       <div className="bg-white rounded-xl border border-slate-200 shadow-sm p-4 mb-4 flex flex-wrap items-end justify-between gap-3">
         <div>
-          <p className="font-body text-xs text-slate-500 mb-1">Class aur subject</p>
+          <p className="font-body text-xs text-slate-500 mb-1">Class and subject</p>
           <select className={`${INPUT} w-80 max-w-full`} value={classId} onChange={(e) => setClassId(e.target.value)}>
             {classes.map((c) => <option key={c.id} value={c.id}>{c.course} · Sem {c.semester} · {c.subject}{c.is_sample ? ' (SAMPLE)' : ''}</option>)}
           </select>
@@ -169,7 +169,7 @@ export default function FacultyMarksPage({ session }) {
                 </tr>
               </thead>
               <tbody>
-                {items.length === 0 && <tr><td colSpan={comps.length + 4} className="px-4 py-8 text-center text-slate-500">Is class me koi student nahi hai.</td></tr>}
+                {items.length === 0 && <tr><td colSpan={comps.length + 4} className="px-4 py-8 text-center text-slate-500">This class has no students.</td></tr>}
                 {items.map((s) => {
                   const internal = liveInternal(s)
                   return (

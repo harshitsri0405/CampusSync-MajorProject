@@ -95,7 +95,7 @@ export default function FacultyProfilePage({ session }) {
             </button>
             {p.has_photo && (
               <button className="rounded-md border border-slate-300 bg-white px-3 py-1.5 font-body text-sm text-slate-700 hover:bg-slate-50 disabled:opacity-60 flex items-center gap-1.5" disabled={busy} onClick={removePhoto}>
-                <Trash2 size={15} /> Hatao
+                <Trash2 size={15} /> Remove
               </button>
             )}
           </div>

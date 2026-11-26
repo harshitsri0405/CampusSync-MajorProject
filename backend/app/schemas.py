@@ -3162,3 +3162,45 @@ class FacultyPlanTopicsIn(BaseModel):
     done: bool
     done_on: Optional[date] = None
 
+class AdminWardenCreateIn(BaseModel):
+    name: str = Field(min_length=2, max_length=120)
+    login_id: str = Field(min_length=3, max_length=40, pattern=r"^[A-Za-z0-9._-]+$")
+    password: str = Field(min_length=8, max_length=72)
+    phone: str = Field(default="", max_length=20)
+
+
+class AdminWardenActiveIn(BaseModel):
+    active: bool
+
+
+class AdminWardenPasswordIn(BaseModel):
+    password: str = Field(min_length=8, max_length=72)
+
+
+class WardenHostelIn(BaseModel):
+    name: str = Field(min_length=2, max_length=120)
+    hostel_type: str = Field(pattern="^(Boys|Girls)$")
+    address: str = Field(default="", max_length=300)
+    floors: int = Field(ge=1, le=30)
+    info: str = Field(default="", max_length=2000)
+    warden_profile_id: Optional[str] = None
+    contact_phone: str = Field(default="", max_length=20)
+
+
+class WardenRoomIn(BaseModel):
+    hostel_id: str
+    room_no: str = Field(min_length=1, max_length=20)
+    floor: int = Field(ge=0, le=30)
+    room_type: str = Field(pattern="^(Single|Double|Triple)$")
+    capacity: int = Field(ge=1, le=6)
+    is_active: bool = True
+    notes: str = Field(default="", max_length=200)
+
+
+class WardenRoomUpdateIn(BaseModel):
+    room_no: str = Field(min_length=1, max_length=20)
+    floor: int = Field(ge=0, le=30)
+    room_type: str = Field(pattern="^(Single|Double|Triple)$")
+    capacity: int = Field(ge=1, le=6)
+    is_active: bool = True
+    notes: str = Field(default="", max_length=200)

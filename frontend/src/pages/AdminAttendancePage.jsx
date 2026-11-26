@@ -180,7 +180,7 @@ export default function AdminAttendancePage({ session }) {
               </tr></thead>
               <tbody>
                 {loading && <tr><td colSpan={5} className="px-4 py-8 text-center text-slate-500">Loading...</td></tr>}
-                {!loading && data.items.length === 0 && <tr><td colSpan={5} className="px-4 py-10 text-center text-slate-500">Koi student nahi mila.</td></tr>}
+                {!loading && data.items.length === 0 && <tr><td colSpan={5} className="px-4 py-10 text-center text-slate-500">No students found.</td></tr>}
                 {!loading && data.items.map((r) => (
                   <tr key={r.student_id} className="border-b border-slate-100 last:border-0 hover:bg-slate-50/60 cursor-pointer" onClick={() => openStudent(r.student_id)}>
                     <td className="px-4 py-3"><p className="text-slate-900 font-medium">{r.name}</p><p className="text-xs text-slate-500">{r.college_id}</p></td>

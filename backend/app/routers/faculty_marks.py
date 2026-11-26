@@ -170,7 +170,7 @@ def publish(payload: schemas.FacultyMarksPublishIn, faculty=Depends(require_facu
     a = my_assignment(db, faculty, payload.assignment_id)
     students = _students(db, a)
     if not students:
-        raise HTTPException(status_code=400, detail="Is class me koi student nahi hai.")
+        raise HTTPException(status_code=400, detail="This class has no students.")
     recs = _records(db, a, [p.id for p in students])
     missing = [p for p in students if recs.get(p.id) is None or recs[p.id].internal_marks is None]
     if missing:

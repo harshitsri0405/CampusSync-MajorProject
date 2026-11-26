@@ -22,9 +22,9 @@ export default function StudentExamCopies({ token, semester }) {
   return (
     <div className="mt-6 border-t border-slate-100 pt-5">
       <p className="font-display text-base text-slate-900 mb-1">Exam copies</p>
-      <p className="font-body text-xs text-slate-400 mb-3">Faculty ne jo checked copies upload ki hain, yahan dikhengi.</p>
+      <p className="font-body text-xs text-slate-400 mb-3">Evaluated copies uploaded by your faculty appear here.</p>
       {error && <p className="font-body text-sm text-red-600 mb-2">{error}</p>}
-      {list.length === 0 && <p className="font-body text-sm text-slate-500">Is semester ki koi exam copy abhi upload nahi hui.</p>}
+      {list.length === 0 && <p className="font-body text-sm text-slate-500">No exam copies have been uploaded for this semester yet.</p>}
       <div className="space-y-2">
         {list.map((c) => (
           <div key={c.id} className="flex flex-wrap items-center justify-between gap-2 rounded-lg border border-purple-100 px-4 py-3">
@@ -36,7 +36,7 @@ export default function StudentExamCopies({ token, semester }) {
               </div>
             </div>
             <button onClick={() => open(c)} className="inline-flex items-center gap-1.5 rounded-md bg-purple-600 px-3 py-1.5 font-body text-sm text-white hover:bg-purple-700">
-              <Download size={14} /> Copy dekho
+              <Download size={14} /> View copy
             </button>
           </div>
         ))}

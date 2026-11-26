@@ -119,7 +119,7 @@ export default function AdminReportsPage({ session }) {
               )}
               {current && current.filters.length === 0 && <span className="font-body text-sm text-slate-500">Is report me koi filter nahi hai.</span>}
             </div>
-            <button className={`${OUTLINE} flex items-center gap-1.5`} disabled={busy || !data || rows.length === 0} onClick={download}><Download size={15} /> {busy ? 'Download ho raha hai...' : 'CSV download'}</button>
+            <button className={`${OUTLINE} flex items-center gap-1.5`} disabled={busy || !data || rows.length === 0} onClick={download}><Download size={15} /> {busy ? 'Downloading...' : 'CSV download'}</button>
           </div>
 
           {loading && <p className="font-body text-sm text-slate-500">Report ban rahi hai...</p>}

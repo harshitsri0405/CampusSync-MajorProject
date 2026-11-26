@@ -177,7 +177,7 @@ def announce(payload: schemas.FacultyAnnouncementIn, faculty=Depends(require_fac
     g = students_by_class(db).get((norm(cls.course), cls.semester))
     students = g["students"] if g else []
     if not students:
-        raise HTTPException(status_code=400, detail="Is class me koi student nahi hai.")
+        raise HTTPException(status_code=400, detail="This class has no students.")
     for p in students:
         notify(db, p.id, "notice", f"{cls.subject}: {payload.title}", payload.body, "notices")
     db.add(models.FacultyAnnouncement(faculty_profile_id=faculty.id, class_id=cls.id, title=payload.title, body=payload.body, recipients=len(students)))

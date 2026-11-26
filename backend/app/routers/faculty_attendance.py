@@ -206,7 +206,7 @@ def export(assignment_id: str, month: str, faculty=Depends(require_faculty), db:
 
 def _board(db: Session, a, scope: str, start: Optional[date], end: Optional[date]) -> dict:
     if start and end and start > end:
-        raise HTTPException(status_code=400, detail="Start date end date se pehle honi chahiye.")
+        raise HTTPException(status_code=400, detail="The start date must be on or before the end date.")
     R = models.AttendanceRecord
     students = _students(db, a)
     ids = [p.id for p in students]
@@ -275,10 +275,10 @@ def leaderboard_export(
     buf = io.StringIO()
     w = csv.writer(buf)
     label = "Poori class" if scope == "class" else a.subject
-    w.writerow([f"Attendance leaderboard - {a.course} Sem {a.semester} - {label}" + (f" ({data['start'] or 'start'} se {data['end'] or 'aaj'})" if data["start"] or data["end"] else "")])
+    w.writerow([f"Attendance leaderboard - {a.course} Sem {a.semester} - {label}" + (f" ({data['start'] or 'start'} to {data['end'] or 'today'})" if data["start"] or data["end"] else "")])
     w.writerow(["Rank", "College ID", "Student", "Present", "Absent", "Total", "Attendance %", "Status"])
     for r in data["items"]:
-        status = "Data nahi" if r["total"] == 0 else ("Low" if r["low"] else "OK")
+        status = "No data" if r["total"] == 0 else ("Low" if r["low"] else "OK")
         w.writerow(["" if r["rank"] is None else r["rank"], _safe(r["college_id"]), _safe(r["name"]), r["present"], r["absent"], r["total"],
                     "" if r["pct"] is None else r["pct"], status])
     fname = re.sub(r"[^A-Za-z0-9_-]+", "-", f"leaderboard-{label}").strip("-")

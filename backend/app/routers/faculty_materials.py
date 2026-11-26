@@ -53,7 +53,7 @@ def material_out(m) -> dict:
 def file_path(m) -> Path:
     p = ROOT / m.stored_name
     if not p.is_file():
-        raise HTTPException(status_code=404, detail="File server par nahi mili.")
+        raise HTTPException(status_code=404, detail="File not found on the server.")
     return p
 
 
@@ -61,10 +61,10 @@ def _own(db: Session, faculty, material_id: str):
     try:
         mid = uuid.UUID(material_id)
     except ValueError:
-        raise HTTPException(status_code=404, detail="Material nahi mila.")
+        raise HTTPException(status_code=404, detail="Material not found.")
     m = db.query(M).filter(M.id == mid).first()
     if not m:
-        raise HTTPException(status_code=404, detail="Material nahi mila.")
+        raise HTTPException(status_code=404, detail="Material not found.")
     my_assignment(db, faculty, str(m.assignment_id))  # galat faculty ho to 403/404
     return m
 
@@ -105,21 +105,21 @@ def upload(
     a = my_assignment(db, faculty, assignment_id)
     title = title.strip()
     if not title or len(title) > 200:
-        raise HTTPException(status_code=400, detail="Title 1 se 200 akshar ka hona chahiye.")
+        raise HTTPException(status_code=400, detail="The title must be 1 to 200 characters.")
     if category not in CATEGORIES:
-        raise HTTPException(status_code=400, detail="Category sahi nahi hai.")
+        raise HTTPException(status_code=400, detail="Invalid category.")
     if len(description) > 2000:
-        raise HTTPException(status_code=400, detail="Description bahut lambi hai.")
+        raise HTTPException(status_code=400, detail="The description is too long.")
     ext = Path(file.filename or "").suffix.lower()
     if ext not in EXTS:
-        raise HTTPException(status_code=400, detail="Ye file type allowed nahi hai. PDF, PPT, DOC, XLS, TXT ya image do.")
+        raise HTTPException(status_code=400, detail="This file type is not allowed. Please use PDF, PPT, DOC, XLS, TXT or an image.")
     data = file.file.read(MAX_BYTES + 1)
     if not data:
-        raise HTTPException(status_code=400, detail="File khali hai.")
+        raise HTTPException(status_code=400, detail="The file is empty.")
     if len(data) > MAX_BYTES:
-        raise HTTPException(status_code=400, detail=f"File {MAX_MB} MB se badi hai.")
+        raise HTTPException(status_code=400, detail=f"The file is larger than {MAX_MB} MB.")
     if not _sig_ok(ext, data[:8]):
-        raise HTTPException(status_code=400, detail="File ka content uske type se match nahi karta.")
+        raise HTTPException(status_code=400, detail="The file content does not match its type.")
 
     ROOT.mkdir(parents=True, exist_ok=True)
     stored = f"{uuid.uuid4().hex}{ext}"
@@ -134,7 +134,7 @@ def upload(
         )
         db.add(m)
         for p in _students(db, a):
-            notify(db, p.id, "material", "Naya study material", f"{a.subject}: {title}", "materials")
+            notify(db, p.id, "material", "New study material", f"{a.subject}: {title}", "materials")
         db.commit()
     except Exception:
         db.rollback()
@@ -150,15 +150,15 @@ def update(material_id: str, body: FacultyMaterialUpdateIn, faculty=Depends(requ
     if body.title is not None:
         t = body.title.strip()
         if not t or len(t) > 200:
-            raise HTTPException(status_code=400, detail="Title 1 se 200 akshar ka hona chahiye.")
+            raise HTTPException(status_code=400, detail="The title must be 1 to 200 characters.")
         m.title = t
     if body.description is not None:
         if len(body.description) > 2000:
-            raise HTTPException(status_code=400, detail="Description bahut lambi hai.")
+            raise HTTPException(status_code=400, detail="The description is too long.")
         m.description = body.description.strip()
     if body.category is not None:
         if body.category not in CATEGORIES:
-            raise HTTPException(status_code=400, detail="Category sahi nahi hai.")
+            raise HTTPException(status_code=400, detail="Invalid category.")
         m.category = body.category
     if body.is_visible is not None:
         m.is_visible = body.is_visible

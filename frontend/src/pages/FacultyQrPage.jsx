@@ -124,14 +124,14 @@ export default function FacultyQrPage({ session }) {
     setError(''); setOk(''); setBusy(true)
     try {
       const sheet = await facultyAttendanceSheet(token, classId, cur.day)
-      if (!sheet.editable) throw new Error(`${sheet.edit_days} din se purani attendance badal nahi sakte.`)
-      if (sheet.marked && !window.confirm('Is din ki attendance pehle lag chuki hai. Is QR session ke result se badal dein?')) return
+      if (!sheet.editable) throw new Error(`Attendance older than ${sheet.edit_days} days cannot be changed.`)
+      if (sheet.marked && !window.confirm('Attendance for this day has already been taken. Replace it with the result of this QR session?')) return
       const r = await saveFacultyAttendance(token, {
         assignment_id: classId, day: cur.day,
         records: data.items.map((s) => ({ student_id: s.id, status: present[s.id] ? 'present' : 'absent' })),
       })
       await facultyQrFinalize(token, cur.id)
-      setOk(`Attendance register me save ho gayi: ${r.present} present, ${r.absent} absent.`)
+      setOk(`Attendance saved to the register: ${r.present} present, ${r.absent} absent.`)
       setCur(null); setData(null); setQrImg('')
       await loadSession()
     } catch (e) { setError(e.message) } finally { setBusy(false) }
@@ -141,8 +141,8 @@ export default function FacultyQrPage({ session }) {
   if (classes.length === 0) {
     return (
       <div className="bg-white rounded-xl border border-slate-200 p-8 text-center max-w-xl mx-auto">
-        <p className="font-display text-base text-slate-900 mb-1">Abhi koi class assign nahi hai</p>
-        <p className="font-body text-sm text-slate-500">Pehle Dashboard ya My Classes se sample classes banao.</p>
+        <p className="font-display text-base text-slate-900 mb-1">No classes are assigned yet</p>
+        <p className="font-body text-sm text-slate-500">First create sample classes from the Dashboard or My Classes.</p>
       </div>
     )
   }
@@ -153,7 +153,7 @@ export default function FacultyQrPage({ session }) {
   return (
     <div className="max-w-5xl mx-auto">
       <div className="bg-white rounded-xl border border-slate-200 shadow-sm p-4 mb-4">
-        <p className="font-body text-xs text-slate-500 mb-1">Class aur subject</p>
+        <p className="font-body text-xs text-slate-500 mb-1">Class and subject</p>
         <select className={`${INPUT} w-80 max-w-full`} value={classId} onChange={(e) => setClassId(e.target.value)}>
           {classes.map((c) => <option key={c.id} value={c.id}>{c.course} · Sem {c.semester} · {c.subject}{c.is_sample ? ' (SAMPLE)' : ''}</option>)}
         </select>
@@ -164,9 +164,9 @@ export default function FacultyQrPage({ session }) {
 
       {!active && (
         <div className="bg-white rounded-xl border border-slate-200 shadow-sm p-5 mb-4">
-          <p className="font-display text-base text-slate-900 flex items-center gap-2"><QrCode size={18} className="text-green-600" /> Naya QR attendance session</p>
+          <p className="font-display text-base text-slate-900 flex items-center gap-2"><QrCode size={18} className="text-green-600" /> New QR attendance session</p>
           <p className="font-body text-xs text-slate-500 mt-1 mb-4">
-            Shuru karte waqt aap jahan ho (class me), wahi class ki location ban jaati hai. Browser location ki permission maangega.
+            When you start, your current position is saved as the classroom location. Your browser will ask for location permission.
           </p>
           <div className="flex flex-wrap items-end gap-3">
             <div>
@@ -176,28 +176,28 @@ export default function FacultyQrPage({ session }) {
               </select>
             </div>
             <div>
-              <p className="font-body text-xs text-slate-500 mb-1">Session kitni der chalega</p>
+              <p className="font-body text-xs text-slate-500 mb-1">Session duration</p>
               <select className={INPUT} value={minutes} onChange={(e) => setMinutes(e.target.value)}>
                 {[5, 10, 15, 30, 60].map((m) => <option key={m} value={m}>{m} minute</option>)}
               </select>
             </div>
             <button className={`${PRIMARY} inline-flex items-center gap-1.5`} disabled={busy} onClick={start}>
-              <MapPin size={15} /> {busy ? 'Location le rahe hain...' : 'Location lekar session shuru karo'}
+              <MapPin size={15} /> {busy ? 'Getting your location...' : 'Start session with my location'}
             </button>
           </div>
-          <p className="font-body text-xs text-slate-400 mt-3">Class ke andar GPS 20-50 m galat ho sakta hai, isliye radius 100 m ya zyada rakhna behtar hai.</p>
+          <p className="font-body text-xs text-slate-400 mt-3">GPS can be off by 20-50 m indoors, so a radius of 100 m or more is recommended.</p>
         </div>
       )}
 
       {cur && active && (
         <div className="grid md:grid-cols-[340px,1fr] gap-4 mb-4">
           <div className="bg-white rounded-xl border border-slate-200 shadow-sm p-5 text-center">
-            {qrImg ? <img src={qrImg} alt="Attendance QR" className="mx-auto w-full max-w-[320px] rounded-lg" /> : <div className="h-[320px] flex items-center justify-center font-body text-sm text-slate-400">QR ban raha hai...</div>}
-            <p className="font-body text-xs text-slate-500 mt-3">Ye QR har 20 second me badalta hai. Students ko isi screen se scan karne do.</p>
+            {qrImg ? <img src={qrImg} alt="Attendance QR" className="mx-auto w-full max-w-[320px] rounded-lg" /> : <div className="h-[320px] flex items-center justify-center font-body text-sm text-slate-400">Generating QR code...</div>}
+            <p className="font-body text-xs text-slate-500 mt-3">This QR code refreshes every 20 seconds. Let students scan it directly from this screen.</p>
             <p className="font-display text-2xl text-slate-900 mt-3">{mmss(left)}</p>
-            <p className="font-body text-xs text-slate-500">session khatam hone me</p>
+            <p className="font-body text-xs text-slate-500">until the session ends</p>
             <p className="font-body text-xs text-slate-500 mt-3">Radius {cur.radius_m} m · GPS accuracy ±{cur.accuracy} m</p>
-            <button className={`${OUTLINE} mt-3`} disabled={busy} onClick={closeSession}>Session abhi band karo</button>
+            <button className={`${OUTLINE} mt-3`} disabled={busy} onClick={closeSession}>End session now</button>
           </div>
           <div className="bg-white rounded-xl border border-slate-200 shadow-sm p-5">
             <p className="font-body text-xs text-slate-500">{cur.subject} · {fmtDay(cur.day)}</p>
@@ -206,13 +206,13 @@ export default function FacultyQrPage({ session }) {
             <div className="mt-4 h-2 rounded-full bg-slate-100 overflow-hidden">
               <span className="block h-full bg-green-500 transition-all" style={{ width: `${data && data.total ? (data.scanned * 100) / data.total : 0}%` }} />
             </div>
-            <p className="font-body text-xs text-slate-400 mt-3">Session khatam hone ke baad neeche list se attendance register me save karo.</p>
+            <p className="font-body text-xs text-slate-400 mt-3">After the session ends, save the attendance to the register from the list below.</p>
           </div>
         </div>
       )}
 
       {cur && !active && !cur.finalized && (
-        <p className="font-body text-sm text-amber-700 mb-3">Ye session khatam ho gaya hai. Neeche list dekho aur register me save karo.</p>
+        <p className="font-body text-sm text-amber-700 mb-3">This session has ended. Review the list below and save it to the register.</p>
       )}
 
       {cur && data && (
@@ -235,7 +235,7 @@ export default function FacultyQrPage({ session }) {
                   return (
                     <tr key={s.id} className="border-b border-slate-100 last:border-0">
                       <td className="px-4 py-2.5 text-slate-900">{s.name}<span className="block text-xs text-slate-400">{s.college_id}</span></td>
-                      <td className="px-4 py-2.5 text-slate-700">{s.scanned_at ? fmtTime(s.scanned_at) : <span className="text-slate-400">Scan nahi kiya</span>}</td>
+                      <td className="px-4 py-2.5 text-slate-700">{s.scanned_at ? fmtTime(s.scanned_at) : <span className="text-slate-400">Not scanned</span>}</td>
                       <td className="px-4 py-2.5 text-slate-700">{s.distance_m !== null ? `${s.distance_m} m` : '-'}</td>
                       <td className="px-4 py-2.5">
                         <div className="flex justify-end gap-2">
@@ -251,7 +251,7 @@ export default function FacultyQrPage({ session }) {
               </tbody>
             </table>
           </div>
-          <button className={`${PRIMARY} mt-4`} disabled={busy} onClick={finalize}>{busy ? 'Saving...' : 'Attendance register me save karo'}</button>
+          <button className={`${PRIMARY} mt-4`} disabled={busy} onClick={finalize}>{busy ? 'Saving...' : 'Save to attendance register'}</button>
         </>
       )}
 
@@ -262,8 +262,8 @@ export default function FacultyQrPage({ session }) {
             <table className="w-full font-body text-sm">
               <thead>
                 <tr className="text-left text-xs uppercase tracking-wide text-slate-500 bg-slate-50 border-b border-slate-200">
-                  <th className="px-4 py-3 font-medium">Date</th><th className="px-4 py-3 font-medium">Shuru</th>
-                  <th className="px-4 py-3 font-medium text-right">Scan</th><th className="px-4 py-3 font-medium">Register me</th>
+                  <th className="px-4 py-3 font-medium">Date</th><th className="px-4 py-3 font-medium">Start</th>
+                  <th className="px-4 py-3 font-medium text-right">Scan</th><th className="px-4 py-3 font-medium">In register</th>
                 </tr>
               </thead>
               <tbody>
@@ -272,7 +272,7 @@ export default function FacultyQrPage({ session }) {
                     <td className="px-4 py-2.5 text-slate-900">{fmtDay(h.day)}</td>
                     <td className="px-4 py-2.5 text-slate-700">{fmtTime(h.starts_at)}</td>
                     <td className="px-4 py-2.5 text-right text-slate-700">{h.scanned} / {h.total}</td>
-                    <td className="px-4 py-2.5">{h.finalized ? <span className="text-green-700">Save ho gayi</span> : <span className="text-slate-400">Baaki</span>}</td>
+                    <td className="px-4 py-2.5">{h.finalized ? <span className="text-green-700">Saved</span> : <span className="text-slate-400">Pending</span>}</td>
                   </tr>
                 ))}
               </tbody>

@@ -60,9 +60,9 @@ export default function FacultyMaterialsPage({ session }) {
   async function upload(e) {
     e.preventDefault()
     setError(''); setOk('')
-    if (!file) return setError('Pehle file chuno.')
+    if (!file) return setError('Please select a file first.')
     if (!title.trim()) return setError('Title likho.')
-    if (meta && file.size > meta.max_mb * 1048576) return setError(`File ${meta.max_mb} MB se badi hai.`)
+    if (meta && file.size > meta.max_mb * 1048576) return setError(`The file is larger than ${meta.max_mb} MB.`)
     setBusy(true)
     try {
       const fd = new FormData()
@@ -72,7 +72,7 @@ export default function FacultyMaterialsPage({ session }) {
       fd.append('description', desc)
       fd.append('file', file)
       await uploadFacultyMaterial(token, fd)
-      setOk('Upload ho gaya. Students ko notification bhej diya.')
+      setOk('Uploaded. Students have been notified.')
       setTitle(''); setDesc(''); setFile(null); setFileKey(fileKey + 1)
       await load()
     } catch (err) { setError(err.message) } finally { setBusy(false) }
@@ -87,15 +87,15 @@ export default function FacultyMaterialsPage({ session }) {
     setError(''); setOk('')
     try {
       await updateFacultyMaterial(token, m.id, edit)
-      setEditId(''); setOk('Badlaav save ho gaye.')
+      setEditId(''); setOk('Changes saved.')
       await load()
     } catch (err) { setError(err.message) }
   }
 
   async function remove(m) {
-    if (!window.confirm(`"${m.title}" hamesha ke liye hata dein?`)) return
+    if (!window.confirm(`Permanently delete "${m.title}"?`)) return
     setError(''); setOk('')
-    try { await deleteFacultyMaterial(token, m.id); setOk('Material hata diya.'); await load() } catch (err) { setError(err.message) }
+    try { await deleteFacultyMaterial(token, m.id); setOk('Material removed.'); await load() } catch (err) { setError(err.message) }
   }
 
   async function download(m) {
@@ -107,8 +107,8 @@ export default function FacultyMaterialsPage({ session }) {
   if (classes.length === 0) {
     return (
       <div className="bg-white rounded-xl border border-slate-200 p-8 text-center max-w-xl mx-auto">
-        <p className="font-display text-base text-slate-900 mb-1">Abhi koi class assign nahi hai</p>
-        <p className="font-body text-sm text-slate-500">Pehle Dashboard ya My Classes se sample classes banao.</p>
+        <p className="font-display text-base text-slate-900 mb-1">No classes are assigned yet</p>
+        <p className="font-body text-sm text-slate-500">First create sample classes from the Dashboard or My Classes.</p>
       </div>
     )
   }
@@ -116,31 +116,31 @@ export default function FacultyMaterialsPage({ session }) {
   return (
     <div className="max-w-5xl mx-auto">
       <div className="bg-white rounded-xl border border-slate-200 shadow-sm p-4 mb-4">
-        <p className="font-body text-xs text-slate-500 mb-1">Class aur subject</p>
+        <p className="font-body text-xs text-slate-500 mb-1">Class and subject</p>
         <select className={`${INPUT} w-80 max-w-full`} value={classId} onChange={(e) => setClassId(e.target.value)}>
           {classes.map((c) => <option key={c.id} value={c.id}>{c.course} · Sem {c.semester} · {c.subject}{c.is_sample ? ' (SAMPLE)' : ''}</option>)}
         </select>
       </div>
 
       <form onSubmit={upload} className="bg-white rounded-xl border border-slate-200 shadow-sm p-5 mb-4">
-        <p className="font-display text-base text-slate-900 mb-1">Naya material upload karo</p>
+        <p className="font-display text-base text-slate-900 mb-1">Upload new material</p>
         <p className="font-body text-xs text-slate-500 mb-4">
-          {cls ? `${cls.course} · Sem ${cls.semester} · ${cls.subject}` : ''} ke students ko dikhega.
+          Visible to students of {cls ? `${cls.course} · Sem ${cls.semester} · ${cls.subject}` : ''}.
           {meta ? ` Allowed: ${meta.extensions.join(', ')} (max ${meta.max_mb} MB).` : ''}
         </p>
         <div className="grid sm:grid-cols-2 gap-3">
-          <input className={INPUT} placeholder="Title (jaise: Unit 1 Notes)" maxLength={200} value={title} onChange={(e) => setTitle(e.target.value)} />
+          <input className={INPUT} placeholder="Title (e.g. Unit 1 Notes)" maxLength={200} value={title} onChange={(e) => setTitle(e.target.value)} />
           <select className={INPUT} value={cat} onChange={(e) => setCat(e.target.value)}>
             {(meta ? meta.categories : ['Notes']).map((c) => <option key={c} value={c}>{c}</option>)}
           </select>
           <textarea className={`${INPUT} sm:col-span-2`} rows={2} placeholder="Chhota description (optional)" maxLength={2000} value={desc} onChange={(e) => setDesc(e.target.value)} />
           <div className="sm:col-span-2 flex flex-wrap items-center gap-3">
             <label className={`${OUTLINE} inline-flex items-center gap-1.5 cursor-pointer py-2`}>
-              <Upload size={14} /> {file ? file.name : 'File chuno'}
+              <Upload size={14} /> {file ? file.name : 'Choose file'}
               <input key={fileKey} type="file" className="hidden" onChange={(e) => setFile(e.target.files[0] || null)} />
             </label>
             {file && <span className="font-body text-xs text-slate-500">{fmtSize(file.size)}</span>}
-            <button className={`${PRIMARY} ml-auto`} disabled={busy}>{busy ? 'Upload ho raha hai...' : 'Upload karo'}</button>
+            <button className={`${PRIMARY} ml-auto`} disabled={busy}>{busy ? 'Uploading...' : 'Upload'}</button>
           </div>
         </div>
       </form>
@@ -149,9 +149,9 @@ export default function FacultyMaterialsPage({ session }) {
       {ok && <p className="font-body text-sm text-green-700 mb-3">{ok}</p>}
 
       <div className="flex flex-wrap items-center gap-3 mb-3">
-        <input className={`${INPUT} w-64`} placeholder="Title se search karo" value={q} onChange={(e) => setQ(e.target.value)} />
+        <input className={`${INPUT} w-64`} placeholder="Search by title" value={q} onChange={(e) => setQ(e.target.value)} />
         <select className={INPUT} value={category} onChange={(e) => setCategory(e.target.value)}>
-          <option value="">Saari categories</option>
+          <option value="">All categories</option>
           {(meta ? meta.categories : []).map((c) => <option key={c} value={c}>{c}</option>)}
         </select>
         <span className="font-body text-sm text-slate-500 ml-auto">{items.length} material</span>
@@ -160,7 +160,7 @@ export default function FacultyMaterialsPage({ session }) {
       <div className="space-y-3">
         {items.length === 0 && (
           <div className="bg-white rounded-xl border border-slate-200 p-8 text-center font-body text-sm text-slate-500">
-            Is class me abhi koi material upload nahi hua.
+            No materials have been uploaded for this class yet.
           </div>
         )}
         {items.map((m) => (
@@ -187,7 +187,7 @@ export default function FacultyMaterialsPage({ session }) {
                   <p className="font-body text-xs text-slate-500 mt-0.5">
                     <span className="rounded-full bg-slate-100 px-2 py-0.5 mr-2">{m.category}</span>
                     {fmtSize(m.size)} · {fmtDate(m.created_at)} · {m.downloads} download
-                    {!m.is_visible && <span className="ml-2 text-amber-700">Students se chhupa hua</span>}
+                    {!m.is_visible && <span className="ml-2 text-amber-700">Hidden from students</span>}
                   </p>
                   {m.description && <p className="font-body text-sm text-slate-600 mt-1.5">{m.description}</p>}
                 </div>
@@ -195,9 +195,9 @@ export default function FacultyMaterialsPage({ session }) {
                   <button className={`${OUTLINE} inline-flex items-center gap-1.5`} onClick={() => download(m)}><Download size={14} /> Download</button>
                   <button className={`${OUTLINE} inline-flex items-center gap-1.5`} onClick={() => { setEditId(m.id); setEdit({ title: m.title, description: m.description, category: m.category }) }}><Pencil size={14} /> Edit</button>
                   <button className={`${OUTLINE} inline-flex items-center gap-1.5`} onClick={() => toggle(m)}>
-                    {m.is_visible ? <><EyeOff size={14} /> Chhupao</> : <><Eye size={14} /> Dikhao</>}
+                    {m.is_visible ? <><EyeOff size={14} /> Hide</> : <><Eye size={14} /> Show</>}
                   </button>
-                  <button className={`${OUTLINE} inline-flex items-center gap-1.5 text-red-600`} onClick={() => remove(m)}><Trash2 size={14} /> Hatao</button>
+                  <button className={`${OUTLINE} inline-flex items-center gap-1.5 text-red-600`} onClick={() => remove(m)}><Trash2 size={14} /> Remove</button>
                 </div>
               </div>
             )}

@@ -33,9 +33,9 @@ def _course(db: Session, course_id: str, semester: int):
 
 
 def _subject(db: Session, subject_id: str):
-    sub = db.query(models.AdminSubject).filter(models.AdminSubject.id == _uuid(subject_id, "Subject nahi mila.")).first()
+    sub = db.query(models.AdminSubject).filter(models.AdminSubject.id == _uuid(subject_id, "Subject not found.")).first()
     if not sub:
-        raise HTTPException(status_code=404, detail="Subject nahi mila.")
+        raise HTTPException(status_code=404, detail="Subject not found.")
     course = db.query(models.AdminCourse).filter(models.AdminCourse.id == sub.course_id).first()
     return sub, course
 

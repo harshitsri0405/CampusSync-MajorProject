@@ -64,9 +64,9 @@ def _out(s, courses, depts, usage) -> schemas.SubjectOut:
 
 
 def _get(db: Session, subject_id: str):
-    s = db.query(models.AdminSubject).filter(models.AdminSubject.id == _uuid(subject_id, "Subject nahi mila.")).first()
+    s = db.query(models.AdminSubject).filter(models.AdminSubject.id == _uuid(subject_id, "Subject not found.")).first()
     if not s:
-        raise HTTPException(status_code=404, detail="Subject nahi mila.")
+        raise HTTPException(status_code=404, detail="Subject not found.")
     return s
 
 

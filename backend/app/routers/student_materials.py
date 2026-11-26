@@ -50,10 +50,10 @@ def download(material_id: str, student=Depends(get_current_student), db: Session
     try:
         mid = uuid.UUID(material_id)
     except ValueError:
-        raise HTTPException(status_code=404, detail="Material nahi mila.")
+        raise HTTPException(status_code=404, detail="Material not found.")
     m = _mine(db, student).filter(M.id == mid).first()
     if not m:
-        raise HTTPException(status_code=404, detail="Material nahi mila.")
+        raise HTTPException(status_code=404, detail="Material not found.")
     path = file_path(m)
     m.downloads = (m.downloads or 0) + 1
     db.commit()

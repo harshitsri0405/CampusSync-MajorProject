@@ -210,7 +210,7 @@ def import_students(
         raise HTTPException(status_code=400, detail="File UTF-8 CSV honi chahiye (Excel me 'CSV UTF-8' se save karo).")
     reader = csv.DictReader(io.StringIO(text))
     if not reader.fieldnames:
-        raise HTTPException(status_code=400, detail="File khali hai.")
+        raise HTTPException(status_code=400, detail="The file is empty.")
     reader.fieldnames = [(h or "").strip().lower() for h in reader.fieldnames]
     for need in ("college_id", "name"):
         if need not in reader.fieldnames:

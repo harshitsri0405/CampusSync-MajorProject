@@ -33,10 +33,10 @@ def _own(db: Session, faculty, copy_id: str):
     try:
         cid = uuid.UUID(copy_id)
     except ValueError:
-        raise HTTPException(status_code=404, detail="Copy nahi mili.")
+        raise HTTPException(status_code=404, detail="Copy not found.")
     c = db.query(C).filter(C.id == cid).first()
     if not c:
-        raise HTTPException(status_code=404, detail="Copy nahi mili.")
+        raise HTTPException(status_code=404, detail="Copy not found.")
     my_assignment(db, faculty, str(c.assignment_id))
     return c
 
@@ -68,10 +68,10 @@ def upload(
     a = my_assignment(db, faculty, assignment_id)
     exam_name = exam_name.strip()
     if not exam_name or len(exam_name) > 60:
-        raise HTTPException(status_code=400, detail="Exam ka naam 1 se 60 akshar ka hona chahiye.")
+        raise HTTPException(status_code=400, detail="The exam name must be 1 to 60 characters.")
     student = next((p for p in _students(db, a) if str(p.id) == student_id), None)
     if not student:
-        raise HTTPException(status_code=403, detail="Ye student aapki class me nahi hai.")
+        raise HTTPException(status_code=403, detail="This student is not in your class.")
     data, ext, clean = read_upload(file, COPY_EXTS, MAX_MB)
     stored = store(FOLDER, data, ext)
     old = db.query(C).filter(C.assignment_id == a.id, C.student_profile_id == student.id, C.exam_name == exam_name).first()
@@ -84,7 +84,7 @@ def upload(
             c = C(assignment_id=a.id, student_profile_id=student.id, semester=a.semester, subject=a.subject,
                   exam_name=exam_name, file_name=clean, stored_name=stored, size=len(data))
             db.add(c)
-            notify(db, student.id, "result", f"Exam copy: {a.subject}", f"{exam_name} ki copy upload ho gayi hai.", "results")
+            notify(db, student.id, "result", f"Exam copy: {a.subject}", f"Your evaluated copy for {exam_name} has been uploaded.", "results")
         db.commit()
     except Exception:
         db.rollback()

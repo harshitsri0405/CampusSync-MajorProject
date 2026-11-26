@@ -39,9 +39,9 @@ def _uuid(v, msg):
 
 
 def _my_task(db: Session, faculty, task_id: str):
-    link = db.query(L).filter(L.assignment_id == _uuid(task_id, "Assignment nahi mila."), L.faculty_profile_id == faculty.id).first()
+    link = db.query(L).filter(L.assignment_id == _uuid(task_id, "Assignment not found."), L.faculty_profile_id == faculty.id).first()
     if not link:
-        raise HTTPException(status_code=404, detail="Assignment nahi mila ya wo aapka nahi hai.")
+        raise HTTPException(status_code=404, detail="Assignment not found, or it does not belong to you.")
     return link
 
 
@@ -68,16 +68,16 @@ def upload(assignment_id: str = Form(...), file: UploadFile = File(...),
     a = my_assignment(db, faculty, str(link.class_id))
     task = db.query(Task).filter(Task.id == link.assignment_id).first()
     if not task:
-        raise HTTPException(status_code=404, detail="Assignment nahi mila.")
+        raise HTTPException(status_code=404, detail="Assignment not found.")
     if db.query(F).filter(F.assignment_id == task.id).count() >= MAX_FILES:
-        raise HTTPException(status_code=400, detail=f"Ek assignment me max {MAX_FILES} files laga sakte ho. Pehle koi hata do.")
+        raise HTTPException(status_code=400, detail=f"An assignment can have at most {MAX_FILES} files. Remove one first.")
     data, ext, clean = read_upload(file, EXTS, MAX_MB)
     stored = store(FOLDER, data, ext)
     try:
         f = F(assignment_id=task.id, course_key=norm(a.course), semester=a.semester, file_name=clean, stored_name=stored, size=len(data))
         db.add(f)
         for p in _students(db, a):
-            notify(db, p.id, "assignment", f"Assignment file: {task.title}", f"{a.subject}: nayi file attach hui hai.", "assignments")
+            notify(db, p.id, "assignment", f"Assignment file: {task.title}", f"{a.subject}: a new file has been attached.", "assignments")
         db.commit()
     except Exception:
         db.rollback()
@@ -88,9 +88,9 @@ def upload(assignment_id: str = Form(...), file: UploadFile = File(...),
 
 
 def _own_file(db: Session, faculty, file_id: str):
-    f = db.query(F).filter(F.id == _uuid(file_id, "File nahi mili.")).first()
+    f = db.query(F).filter(F.id == _uuid(file_id, "File not found.")).first()
     if not f:
-        raise HTTPException(status_code=404, detail="File nahi mili.")
+        raise HTTPException(status_code=404, detail="File not found.")
     _my_task(db, faculty, str(f.assignment_id))
     return f
 

@@ -22,30 +22,30 @@ MAX_ACCURACY = 150
 def scan(body: StudentQrScanIn, student=Depends(get_current_student), db: Session = Depends(get_db)):
     parts = body.code.strip().split(":")
     if len(parts) != 3 or parts[0] != "CS1":
-        raise HTTPException(status_code=400, detail="Ye CampusSync attendance ka QR nahi hai.")
+        raise HTTPException(status_code=400, detail="This is not a CampusSync attendance QR code.")
     try:
         sid = uuid.UUID(parts[1])
     except ValueError:
-        raise HTTPException(status_code=400, detail="QR sahi nahi hai.")
+        raise HTTPException(status_code=400, detail="Invalid QR code.")
     s = db.query(Q).filter(Q.id == sid).first()
     if not s:
-        raise HTTPException(status_code=404, detail="Attendance session nahi mili.")
+        raise HTTPException(status_code=404, detail="Attendance session not found.")
     if not is_active(s):
-        raise HTTPException(status_code=400, detail="Ye attendance session band ho chuka hai.")
+        raise HTTPException(status_code=400, detail="This attendance session has ended.")
     if not code_ok(s, parts[2]):
-        raise HTTPException(status_code=400, detail="QR purana ho gaya. Screen par naya QR dekhkar dobara scan karo.")
+        raise HTTPException(status_code=400, detail="This QR code has expired. Scan the new QR code shown on the screen.")
     if norm(student.course) != s.course_key or sem_num(student.semester) != s.semester:
-        raise HTTPException(status_code=403, detail="Ye QR aapki class ka nahi hai.")
+        raise HTTPException(status_code=403, detail="This QR code is not for your class.")
 
     old = db.query(S).filter(S.session_id == s.id, S.student_profile_id == student.id).first()
     if old:
-        raise HTTPException(status_code=400, detail="Aapki attendance is session me pehle hi darj ho chuki hai.")
+        raise HTTPException(status_code=400, detail="Your attendance has already been recorded for this session.")
 
     if body.accuracy > MAX_ACCURACY:
-        raise HTTPException(status_code=400, detail=f"Aapki location ki accuracy kam hai (±{int(body.accuracy)} m). Khuli jagah par jaakar ya WiFi/GPS on karke dobara try karo.")
+        raise HTTPException(status_code=400, detail=f"Your location accuracy is low (±{int(body.accuracy)} m). Move to an open area or turn on Wi-Fi/GPS and try again.")
     d = dist_m(body.lat, body.lng, s.lat, s.lng)
     if d > s.radius_m:
-        raise HTTPException(status_code=400, detail=f"Aap class ki location se {int(d)} m door ho (limit {s.radius_m} m). Class ke andar aakar scan karo.")
+        raise HTTPException(status_code=400, detail=f"You are {int(d)} m away from the class location (limit {s.radius_m} m). Please scan from inside the classroom.")
 
     now = now_utc()
     db.add(S(session_id=s.id, student_profile_id=student.id, scanned_at=now, lat=body.lat, lng=body.lng, distance_m=d))
@@ -53,7 +53,7 @@ def scan(body: StudentQrScanIn, student=Depends(get_current_student), db: Sessio
         db.commit()
     except IntegrityError:
         db.rollback()
-        raise HTTPException(status_code=400, detail="Aapki attendance is session me pehle hi darj ho chuki hai.")
+        raise HTTPException(status_code=400, detail="Your attendance has already been recorded for this session.")
     return {"subject": s.subject, "day": s.day.isoformat(), "scanned_at": now.isoformat(), "distance_m": round(d)}
 
 

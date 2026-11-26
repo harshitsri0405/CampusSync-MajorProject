@@ -180,3 +180,7 @@ app.include_router(faculty_timetable.router)
 
 from app.routers import faculty_analytics
 app.include_router(faculty_analytics.router)
+
+from .routers import admin_wardens, faculty_hostel
+app.include_router(admin_wardens.router)
+app.include_router(faculty_hostel.router)

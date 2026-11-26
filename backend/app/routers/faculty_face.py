@@ -33,14 +33,14 @@ def _vec(desc: str):
 
 def _check_vec(v) -> None:
     if len(v) != 128 or not all(isinstance(x, (int, float)) and math.isfinite(x) for x in v):
-        raise HTTPException(status_code=400, detail="Face data sahi nahi hai.")
+        raise HTTPException(status_code=400, detail="Invalid face data.")
 
 
 def _student_in_class(db: Session, a, student_id: str):
     for p in _students(db, a):
         if str(p.id) == str(student_id):
             return p
-    raise HTTPException(status_code=403, detail="Ye student aapki class me nahi hai.")
+    raise HTTPException(status_code=403, detail="This student is not in your class.")
 
 
 @router.get("/status")
@@ -60,19 +60,19 @@ def status(assignment_id: str, faculty=Depends(require_faculty), db: Session = D
 def enroll(body: FacultyFaceEnrollIn, faculty=Depends(require_faculty), db: Session = Depends(get_db)):
     a = my_assignment(db, faculty, body.assignment_id)
     if not body.consent:
-        raise HTTPException(status_code=400, detail="Student ki sahmati (consent) tick karna zaroori hai.")
+        raise HTTPException(status_code=400, detail="The student's consent must be confirmed.")
     _check_vec(body.descriptor)
     student = _student_in_class(db, a, body.student_id)
 
     count = db.query(func.count(T.id)).filter(T.student_profile_id == student.id).scalar() or 0
     if count >= MAX_PHOTOS:
-        raise HTTPException(status_code=400, detail=f"Is student ke {MAX_PHOTOS} photo pehle se hain. Naya dene ke liye pehle hata do.")
+        raise HTTPException(status_code=400, detail=f"This student already has {MAX_PHOTOS} photos. Remove one before adding a new photo.")
 
     other_ids = [p.id for p in _students(db, a) if p.id != student.id]
     if other_ids:
         for _sid, desc in db.query(T.student_profile_id, T.descriptor).filter(T.student_profile_id.in_(other_ids)).all():
             if _dist(body.descriptor, _vec(desc)) < DUP_DIST:
-                raise HTTPException(status_code=400, detail="Ye chehra class ke kisi aur student se milta hai. Sahi student ki photo chuno.")
+                raise HTTPException(status_code=400, detail="This face matches another student in the class. Please choose the correct student's photo.")
 
     db.add(T(student_profile_id=student.id, descriptor=json.dumps([round(float(x), 6) for x in body.descriptor])))
     db.commit()
@@ -97,7 +97,7 @@ def match(body: FacultyFaceMatchIn, faculty=Depends(require_faculty), db: Sessio
         for sid, desc in db.query(T.student_profile_id, T.descriptor).filter(T.student_profile_id.in_(ids)).all():
             tmpl.setdefault(str(sid), []).append(_vec(desc))
     if not tmpl:
-        raise HTTPException(status_code=400, detail="Pehle students ki face photos enrol karo.")
+        raise HTTPException(status_code=400, detail="Enroll the students' face photos first.")
     for d in body.descriptors:
         _check_vec(d)
 

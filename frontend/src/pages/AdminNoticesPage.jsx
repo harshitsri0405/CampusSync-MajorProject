@@ -111,7 +111,7 @@ export default function AdminNoticesPage({ session }) {
         <Stat icon={Megaphone} label="Total notices" value={s.total} color="#2563EB" />
         <Stat icon={Star} label="Important" value={s.important} color="#DC2626" />
         <Stat icon={CalendarDays} label="Upcoming events" value={s.upcoming_events} color="#D97706" />
-        <Stat icon={CalendarClock} label="Is mahine post hue" value={s.this_month} color="#7C3AED" />
+        <Stat icon={CalendarClock} label="This month post hue" value={s.this_month} color="#7C3AED" />
       </div>
 
       <div className="bg-white rounded-xl border border-slate-200 shadow-sm p-4 mb-4 flex flex-wrap items-center justify-between gap-3">

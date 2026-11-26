@@ -123,7 +123,7 @@ export default function AdminSyllabusPage({ session }) {
           <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 mb-4">
             <Stat icon={BookOpen} label="Active subjects" value={st.subjects} color="#2563EB" />
             <Stat icon={CheckCircle2} label={`Syllabus bana (${st.coverage}%)`} value={st.with_syllabus} color="#16A34A" />
-            <Stat icon={AlertCircle} label="Baaki" value={st.missing} color="#D97706" />
+            <Stat icon={AlertCircle} label="Pending" value={st.missing} color="#D97706" />
             <Stat icon={Layers} label="Total units" value={st.units} color="#7C3AED" />
           </div>
           {data.items.length === 0 ? (
@@ -137,7 +137,7 @@ export default function AdminSyllabusPage({ session }) {
                       <p className="font-display text-base text-slate-900">{s.name}</p>
                       <p className="font-body text-xs text-slate-500">{s.code} · {s.credits} credits{!s.is_active ? ' · inactive' : ''}</p>
                     </div>
-                    <span className={`inline-flex rounded-full border px-2.5 py-0.5 text-xs font-medium ${s.has_syllabus ? 'bg-green-50 text-green-700 border-green-200' : 'bg-amber-50 text-amber-700 border-amber-200'}`}>{s.has_syllabus ? 'Syllabus ready' : 'Baaki'}</span>
+                    <span className={`inline-flex rounded-full border px-2.5 py-0.5 text-xs font-medium ${s.has_syllabus ? 'bg-green-50 text-green-700 border-green-200' : 'bg-amber-50 text-amber-700 border-amber-200'}`}>{s.has_syllabus ? 'Syllabus ready' : 'Pending'}</span>
                   </div>
                   {s.has_syllabus && <p className="font-body text-sm text-slate-600 mt-2 capitalize">{s.subject_type} · {s.units} units{s.hours ? ` · ${s.hours} hours` : ''}</p>}
                   <div className="flex gap-2 mt-3">

@@ -43,7 +43,7 @@ export default function FacultyExamCopiesTab({ session }) {
   async function upload(student, file) {
     if (!file) return
     setError(''); setOk('')
-    if (file.size > meta.max_mb * 1048576) return setError(`File ${meta.max_mb} MB se badi hai.`)
+    if (file.size > meta.max_mb * 1048576) return setError(`The file is larger than ${meta.max_mb} MB.`)
     setBusyId(student.id)
     try {
       const fd = new FormData()
@@ -52,7 +52,7 @@ export default function FacultyExamCopiesTab({ session }) {
       fd.append('exam_name', exam.trim())
       fd.append('file', file)
       await facultyExamCopyUpload(token, fd)
-      setOk(`${student.name} ki copy upload ho gayi.`)
+      setOk(`The copy for ${student.name} was uploaded.`)
       await load()
     } catch (e) { setError(e.message) } finally { setBusyId('') }
   }
@@ -63,7 +63,7 @@ export default function FacultyExamCopiesTab({ session }) {
   }
 
   async function remove(student) {
-    if (!window.confirm(`${student.name} ki copy hata dein?`)) return
+    if (!window.confirm(`Remove the copy for ${student.name}?`)) return
     setError(''); setOk(''); setBusyId(student.id)
     try { await facultyExamCopyDelete(token, student.copy.id); await load() } catch (e) { setError(e.message) } finally { setBusyId('') }
   }
@@ -75,7 +75,7 @@ export default function FacultyExamCopiesTab({ session }) {
 
   if (loading) return <p className="font-body text-sm text-slate-500">Loading...</p>
   if (classes.length === 0) {
-    return <div className="bg-white rounded-xl border border-slate-200 p-8 text-center font-body text-sm text-slate-500">Abhi koi class assign nahi hai.</div>
+    return <div className="bg-white rounded-xl border border-slate-200 p-8 text-center font-body text-sm text-slate-500">No classes are assigned yet.</div>
   }
 
   const rows = data ? data.items.filter((s) => `${s.name} ${s.college_id}`.toLowerCase().includes(q.trim().toLowerCase())) : []
@@ -84,13 +84,13 @@ export default function FacultyExamCopiesTab({ session }) {
     <div>
       <div className="bg-white rounded-xl border border-slate-200 shadow-sm p-4 mb-4 flex flex-wrap items-end gap-3">
         <div>
-          <p className="font-body text-xs text-slate-500 mb-1">Class aur subject</p>
+          <p className="font-body text-xs text-slate-500 mb-1">Class and subject</p>
           <select className={`${INPUT} w-80 max-w-full`} value={classId} onChange={(e) => setClassId(e.target.value)}>
             {classes.map((c) => <option key={c.id} value={c.id}>{c.course} · Sem {c.semester} · {c.subject}{c.is_sample ? ' (SAMPLE)' : ''}</option>)}
           </select>
         </div>
         <div>
-          <p className="font-body text-xs text-slate-500 mb-1">Kaun si exam</p>
+          <p className="font-body text-xs text-slate-500 mb-1">Exam</p>
           <input className={`${INPUT} w-56`} list="exam-names" maxLength={60} value={exam} onChange={(e) => setExam(e.target.value)} />
           <datalist id="exam-names">{meta.exams.map((x) => <option key={x} value={x} />)}</datalist>
         </div>
@@ -99,8 +99,8 @@ export default function FacultyExamCopiesTab({ session }) {
       </div>
 
       <p className="font-body text-xs text-slate-500 mb-3">
-        Har student ki copy PDF ya photo (JPG/PNG, max {meta.max_mb} MB) me upload karo. Student ko ye apne Results page me dikhegi.
-        Dobara upload karne par purani copy badal jaati hai.
+        Upload each student's copy as a PDF or photo (JPG/PNG, max {meta.max_mb} MB). Students will see it on their Results page.
+        Uploading again replaces the previous copy.
       </p>
 
       {error && <p className="font-body text-sm text-red-600 mb-3">{error}</p>}
@@ -114,7 +114,7 @@ export default function FacultyExamCopiesTab({ session }) {
             </tr>
           </thead>
           <tbody>
-            {rows.length === 0 && <tr><td colSpan={3} className="px-4 py-8 text-center text-slate-500">Koi student nahi mila.</td></tr>}
+            {rows.length === 0 && <tr><td colSpan={3} className="px-4 py-8 text-center text-slate-500">No students found.</td></tr>}
             {rows.map((s) => (
               <tr key={s.id} className="border-b border-slate-100 last:border-0">
                 <td className="px-4 py-2.5 text-slate-900">{s.name}<span className="block text-xs text-slate-400">{s.college_id}</span></td>
@@ -122,9 +122,9 @@ export default function FacultyExamCopiesTab({ session }) {
                   {s.copy ? (
                     <span className="text-slate-700">
                       {s.copy.file_name} · {fmtSize(s.copy.size)} · {fmtDate(s.copy.uploaded_at)}
-                      {!s.copy.is_visible && <span className="ml-2 text-amber-700">Student se chhupi hui</span>}
+                      {!s.copy.is_visible && <span className="ml-2 text-amber-700">Hidden from student</span>}
                     </span>
-                  ) : <span className="text-slate-400">Upload nahi hui</span>}
+                  ) : <span className="text-slate-400">Not uploaded</span>}
                 </td>
                 <td className="px-4 py-2.5">
                   <div className="flex flex-wrap justify-end gap-2">
@@ -137,11 +137,11 @@ export default function FacultyExamCopiesTab({ session }) {
                         </label>
                         {s.copy && (
                           <>
-                            <button className={`${OUTLINE} inline-flex items-center gap-1.5`} onClick={() => view(s)}><Download size={14} /> Dekho</button>
+                            <button className={`${OUTLINE} inline-flex items-center gap-1.5`} onClick={() => view(s)}><Download size={14} /> View</button>
                             <button className={`${OUTLINE} inline-flex items-center gap-1.5`} onClick={() => toggle(s)}>
-                              {s.copy.is_visible ? <><EyeOff size={14} /> Chhupao</> : <><Eye size={14} /> Dikhao</>}
+                              {s.copy.is_visible ? <><EyeOff size={14} /> Hide</> : <><Eye size={14} /> Show</>}
                             </button>
-                            <button className={`${OUTLINE} inline-flex items-center gap-1.5 text-red-600`} onClick={() => remove(s)}><Trash2 size={14} /> Hatao</button>
+                            <button className={`${OUTLINE} inline-flex items-center gap-1.5 text-red-600`} onClick={() => remove(s)}><Trash2 size={14} /> Remove</button>
                           </>
                         )}
                       </>

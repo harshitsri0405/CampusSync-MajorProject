@@ -155,7 +155,7 @@ export default function AdminGalleryPage({ session }) {
             {open.description && <p className="font-body text-sm text-slate-600 mt-1">{open.description}</p>}
             <div className="mt-4">
               <input ref={fileRef} type="file" accept="image/jpeg,image/png,image/webp" multiple className="hidden" onChange={onFiles} />
-              <button className={`${PRIMARY} flex items-center gap-1.5`} style={{ background: ACCENT }} disabled={busy} onClick={() => fileRef.current && fileRef.current.click()}><Upload size={15} /> {busy ? 'Upload ho raha hai...' : 'Photos upload karo'}</button>
+              <button className={`${PRIMARY} flex items-center gap-1.5`} style={{ background: ACCENT }} disabled={busy} onClick={() => fileRef.current && fileRef.current.click()}><Upload size={15} /> {busy ? 'Uploading...' : 'Photos upload karo'}</button>
               <p className="font-body text-xs text-slate-500 mt-2">JPG, PNG ya WEBP, har photo max {MAX_MB} MB, ek baar me 20 tak, album me 100 tak.</p>
             </div>
           </div>

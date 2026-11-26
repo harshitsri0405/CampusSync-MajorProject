@@ -64,7 +64,7 @@ def _records(db: Session, ids, start, end):
 
 def _check_range(start, end):
     if start and end and start > end:
-        raise HTTPException(status_code=400, detail="Start date end date se pehle honi chahiye.")
+        raise HTTPException(status_code=400, detail="The start date must be on or before the end date.")
 
 
 @router.get("/overview")
