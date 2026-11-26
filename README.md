@@ -1,89 +1,143 @@
 # CampusSync: Smart Campus Management System
 
-College ERP with four role-based modules (Student, Faculty, Admin, Hostel).
-Stack: React + Tailwind (frontend), FastAPI + SQLAlchemy (backend), PostgreSQL, JWT authentication.
+CampusSync is a role-based college ERP built as a major project. A single login gateway opens one of four modules (Student, Faculty, Admin, Hostel) depending on the signed-in role. Private data such as marks, attendance, fees and complaints is visible only to its owner or to the responsible staff role. Public content such as notices, events, gallery and syllabus is visible to everyone.
 
-## What is built so far
+---
 
-| Area | Status |
+## Tech stack
+
+| Layer | Technology |
 |---|---|
-| Login gateway, 4-step registration wizard, JWT auth (all 4 roles) | Done |
-| Student dashboard | Done |
-| Student: Profile (fill, view, edit) | Done |
-| Student: Attendance (summary, subject radar chart, monthly calendar, click a date for class-wise details) | Done |
-| Student: Results (internal marks, semester results, SGPA / CGPA, printable grade card) | Done |
-| Student: Timetable (weekly timetable, exam schedule, practical schedule) | Done |
-| Student: Assignments, Fees, Library, Notices, Syllabus, Gallery, Mentor, Complaints, Placement, Documents, AI | Not started |
-| Faculty, Admin, Hostel modules (after login only a placeholder dashboard) | Not started |
+| Frontend | React 18, Vite, Tailwind CSS 3, lucide-react (no router library; views are switched with state) |
+| Backend | Python 3.11, FastAPI, SQLAlchemy 2.0, Pydantic v2 |
+| Database | PostgreSQL (database name `CampusSync`) |
+| Auth | JWT (python-jose), passlib + bcrypt (**bcrypt must stay pinned to 4.0.1**) |
+| Reports | ReportLab (PDF), openpyxl (Excel) |
+| Browser features | `@vladmandic/face-api` (face attendance), `qrcode` and `html5-qrcode` (QR attendance) |
 
-Attendance, Results and Timetable are written by Faculty / Admin in the real system. Those modules do not exist yet,
-so each of these screens has a **Load sample data** button for testing (controlled by `ENABLE_DEMO_DATA` in `backend/.env`).
-The Timetable is made for a class, so fill **Course** and **Semester** in Student Profile first.
+Fonts: Fraunces (display) and Inter (body). Admin uses a Champagne and Dusty Lavender theme, Student uses Burgundy and Rose Gold, Faculty uses a green accent.
 
-## Requirements
+---
 
-- Python 3.11 (3.12 also works)
-- Node.js 18 or newer
-- PostgreSQL with an empty database named `CampusSync`
+## Getting started (Windows)
 
-## Run: backend
-
-```bash
+### 1. Backend
+```
 cd backend
 python -m venv venv
-venv\Scripts\python.exe -m pip install -r requirements.txt       # Windows
-# Linux / macOS: venv/bin/python -m pip install -r requirements.txt
-
-copy .env.example .env        # Linux / macOS: cp .env.example .env
-# open .env and put your real DATABASE_URL
-
+venv\Scripts\pip install -r requirements.txt
+venv\Scripts\pip install reportlab openpyxl
 venv\Scripts\python.exe -m uvicorn app.main:app --reload --port 8000
 ```
+Always start the server with `python -m uvicorn` from the virtual environment. Health check: http://localhost:8000/api/health
 
-Check: http://localhost:8000/api/health should show `{"status":"ok"}`. Tables are created automatically on startup.
-Always start the server with `venv\Scripts\python.exe -m uvicorn ...` so the correct Python is used.
-
-## Run: frontend (second terminal)
-
-```bash
+### 2. Frontend
+```
 cd frontend
 npm install
 npm run dev
 ```
+The frontend must run on **http://localhost:5173** because the backend CORS configuration allows only that origin. `vite.config.js` proxies `/api` to `http://localhost:8000`.
 
-Open http://localhost:5173 (Vite forwards `/api` to the backend on port 8000).
-The backend only allows the origin `http://localhost:5173`, so make sure the frontend really starts on 5173.
+### 3. Environment variables (`backend/.env`)
+```
+DATABASE_URL=postgresql://postgres:PASSWORD@localhost:5432/CampusSync
+JWT_SECRET_KEY=<a long random string>
+JWT_ALGORITHM=HS256
+ACCESS_TOKEN_EXPIRE_MINUTES=1440
+ENABLE_DEMO_DATA=true
+PAYMENT_MODE=<as configured>
+```
+Special characters in the database password must be URL-encoded (for example `@` becomes `%40`). Never commit `.env`.
 
-## Try the Student module
+---
 
-1. Open the app, choose **Student**, create an account (name, college ID, password).
-2. **Student Profile**: fill the form. Set Course (for example `B.Tech CSE`) and Semester (for example `5th`).
-3. **Attendance**, **Results**, **Timetable**: press **Load sample data** once on each screen.
-
-## Common problems
-
-- **Backend crashes at start with `No module named ...`**: you started a different Python. Use `venv\Scripts\python.exe -m uvicorn ...`.
-- **Registration shows "Something went wrong"**: look at the backend terminal for the traceback. Most often it is a wrong `DATABASE_URL` or a stale table from an older schema. In a development database you can drop the old tables and restart the backend, which recreates them.
-- **"Invalid or expired token"**: log out and log in again (tokens last 24 hours; the app now logs you out automatically).
-- **Port 5173 busy**: another `npm run dev` is still running. Stop it first.
-
-## Project layout
+## Project structure
 
 ```
 backend/
   app/
-    main.py            FastAPI app, CORS, router registration
-    database.py        SQLAlchemy engine and session
-    models.py          Tables (users, role profiles, attendance, results, timetable, exams)
-    schemas.py         Request / response models
-    security.py        Password hashing (bcrypt) and JWT
-    routers/           auth, student, attendance, results, timetable
-  requirements.txt
-  .env.example
+    main.py          CORS, create_all, router registration
+    database.py      engine and session
+    models.py        all SQLAlchemy tables
+    schemas.py       all Pydantic models
+    security.py      hashing and JWT helpers
+    notify.py        in-app notifications for students
+    routers/         one file per feature (auth, student_*, faculty_*, admin_*)
+  uploads/<feature>/ uploaded files (materials, exam_copies, task_files, photos, ...)
 frontend/
   src/
-    pages/             Login, Wizard, Dashboard, StudentDashboard, Student*Page
-    components/        SidePanel, RoleCard, DynamicIcon, AttendanceRadar
-    api.js             All backend calls
-    roles.js           Role configuration (fields, colours, labels)
+    App.jsx          session handling (localStorage key "erp_session")
+    api.js           every backend call (authedRequest adds the Bearer token)
+    roles.js         role configuration
+    components/      shared components and tabs
+    pages/           Student*, Faculty*, Admin* pages and dashboards
 ```
+
+Tables are created at start-up by `Base.metadata.create_all`. There is **no Alembic**: a new table appears by itself, but `create_all` never changes columns of an existing table. Changing an existing table needs a manual `ALTER TABLE`.
+
+---
+
+## Roles and modules
+
+`users.role` is one of `student`, `faculty`, `admin`, `hostel`. Each role has its own profile table linked to `users` through `user_id`.
+
+### Student
+Dashboard, attendance, results, assignments, fees and payments, library, notices, syllabus, gallery, mentor, complaints, study materials, internal exam results and question papers, exam copies, QR attendance scan, placement, analytics, notifications, and hostel services.
+
+### Faculty
+| Area | Features |
+|---|---|
+| Home and profile | Overview cards, profile, assigned classes |
+| Attendance | Mark, history, report, leaderboard, **face attendance**, **QR attendance** |
+| Marks | Marks entry, exam copy upload |
+| Assignments | Create, grade, attach files |
+| Communication | Notices, mentor, complaints |
+| Study Materials | Upload and manage files per class |
+| Course Planner | Syllabus-linked topic and unit planning |
+| Timetable | Weekly timetable and exam schedule |
+| Student Analytics | Class and student performance, risk levels |
+| Examinations | Create internal exams, marks entry, question papers, publish results, exam reports |
+| Performance | Live dashboard across the faculty member's classes |
+| Reports | Attendance, exam, assignment and class summary reports as PDF or Excel |
+| Leave | Apply, balance, history, cancel (approval by admin) |
+
+### Admin
+College setup, timetable, exams, library, notices, gallery, syllabus, settings (for example minimum attendance and pass marks), and faculty leave approval.
+
+### Hostel
+A hostel login role exists with its own profile table. Students can use hostel visitor, mess, complaint and leave tabs.
+
+---
+
+## Conventions
+
+- **API:** routers live in `backend/app/routers/<feature>.py` with the prefix `/api/<role>/<feature>`. Faculty endpoints use the `require_faculty` dependency, and class ownership is checked with `my_assignment`.
+- **Frontend:** every call goes through `src/api.js`. For JSON bodies use `body: JSON.stringify(...)`; for uploads pass a `FormData`.
+- **Uploads:** stored under `backend/uploads/<feature>/` with extension and magic-byte validation.
+- **New data:** always goes into new tables. Existing tables are not altered without a warning.
+- **UI text:** English and professional.
+- **Sample data:** anything created for testing is labelled "Sample" or "DEMO".
+- Browser camera and geolocation features (face and QR attendance) need HTTPS or `localhost`.
+
+---
+
+## Troubleshooting
+
+| Symptom | Likely cause and fix |
+|---|---|
+| `401 Unauthorized` on every request | Session expired. Log out, or clear `erp_session` in Local Storage, and sign in again |
+| `NameError: name 'func' is not defined` in `models.py` | Add `func` to the `sqlalchemy` import |
+| Vite: failed to resolve an import | The page file was not created, or a package is missing (`npm install`) |
+| `AttributeError: module 'app.models' has no attribute ...` | A model was not added to `models.py` |
+| A new route returns 404 | The router is not imported and included in `main.py` |
+| Login fails after reinstalling packages | Check `bcrypt==4.0.1` |
+
+---
+
+## Security notes
+
+- Passwords are hashed with bcrypt. Tokens are JWT with a configurable expiry.
+- Every private endpoint checks the role and ownership on the server. The frontend is never trusted.
+- Uploaded files are type-checked and size-limited. Spreadsheet and CSV exports neutralise formula injection.
+- Do not commit `.env`, the `uploads/` folder or database dumps.
